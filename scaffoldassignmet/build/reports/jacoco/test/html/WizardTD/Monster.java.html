@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Monster.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">scaffoldassignmet</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Monster.java</span></div><h1>Monster.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PImage;
+
+import java.util.ArrayList;
+
+public class Monster {
+
+    private PImage type;
+    private double hp;
+    private double speed;
+    private double armour;
+    private int manaGainedOnkill;
+    private ArrayList&lt;Point&gt; path;
+    private double accumulatedPause;
+    private int count;
+    private int currentX, currentY;
+    private int targetX, targetY;
+    private String moveDirection;
+    private boolean isFired;
+    private double fullHp;
+    private boolean isDie;
+    private App app;
+<span class="fc" id="L24">    private PImage[] deathAnimationImages = new PImage[6];</span>
+<span class="fc" id="L25">    private int deathAnimationFrame = 0;</span>
+    private double originalSpeed;
+    private double freezeTime;
+    private boolean isFrozen;
+
+
+    /**
+     * Constructor without parameters used by testing.
+     */
+<span class="fc" id="L34">    public Monster(){}</span>
+
+    /**
+     * Constructor of Monster.
+     * @param type
+     * @param hp
+     * @param speed
+     * @param armour
+     * @param manaGainedOnkill
+     * @param path
+     * @param accumulatedPause
+     * @param app
+     */
+<span class="fc" id="L47">    public Monster(PImage type, double hp, double speed, double armour, int manaGainedOnkill, ArrayList&lt;Point&gt; path, double accumulatedPause, App app){</span>
+<span class="fc" id="L48">        this.type = type;</span>
+<span class="fc" id="L49">        this.hp = hp;</span>
+<span class="fc" id="L50">        this.speed = speed;</span>
+<span class="fc" id="L51">        this.armour = armour;</span>
+<span class="fc" id="L52">        this.manaGainedOnkill = manaGainedOnkill;</span>
+<span class="fc" id="L53">        this.path = path;</span>
+<span class="fc" id="L54">        this.accumulatedPause = accumulatedPause;</span>
+<span class="fc" id="L55">        this.count = path.size() - 1;</span>
+<span class="fc" id="L56">        Point start = path.get(count);</span>
+<span class="fc" id="L57">        this.currentX = start.getCol() * 32;</span>
+<span class="fc" id="L58">        this.currentY = start.getRow() * 32 + 40;</span>
+<span class="fc" id="L59">        updateTarget();</span>
+<span class="fc" id="L60">        this.fullHp = hp;</span>
+<span class="fc" id="L61">        this.isFired = false;</span>
+<span class="fc" id="L62">        this.isDie = false;</span>
+<span class="fc" id="L63">        this.app = app;</span>
+<span class="fc" id="L64">        deathAnimationImages[0] = app.loadImage(&quot;src/main/resources/WizardTD/gremlin.png&quot;);</span>
+<span class="fc" id="L65">        deathAnimationImages[1] = app.loadImage(&quot;src/main/resources/WizardTD/gremlin1.png&quot;);</span>
+<span class="fc" id="L66">        deathAnimationImages[2] = app.loadImage(&quot;src/main/resources/WizardTD/gremlin2.png&quot;);</span>
+<span class="fc" id="L67">        deathAnimationImages[3] = app.loadImage(&quot;src/main/resources/WizardTD/gremlin3.png&quot;);</span>
+<span class="fc" id="L68">        deathAnimationImages[4] = app.loadImage(&quot;src/main/resources/WizardTD/gremlin4.png&quot;);</span>
+<span class="fc" id="L69">        deathAnimationImages[5] = app.loadImage(&quot;src/main/resources/WizardTD/gremlin5.png&quot;);</span>
+<span class="fc" id="L70">        this.originalSpeed = speed;</span>
+<span class="fc" id="L71">        this.freezeTime = 0;</span>
+<span class="fc" id="L72">        this.isFrozen = false;</span>
+<span class="fc" id="L73">    }</span>
+
+    public void setIsFired(boolean isFired){
+<span class="fc" id="L76">        this.isFired = isFired;</span>
+<span class="fc" id="L77">    }</span>
+
+    public boolean getIsFired(){
+<span class="fc" id="L80">        return isFired;</span>
+    }
+
+    public int getX(){
+<span class="fc" id="L84">        return this.currentX;</span>
+    }
+    public int getY(){
+<span class="fc" id="L87">        return this.currentY;</span>
+    }
+    public double getHp(){
+<span class="fc" id="L90">        return this.hp;</span>
+    }
+
+    /**
+     * Gain the responding mana when kill each monster and there is a liminted largest mana value.
+     * @param hp
+     */
+    public void setHp(double hp){
+<span class="fc" id="L98">        this.hp = hp;</span>
+
+<span class="pc bpc" id="L100" title="3 of 4 branches missed.">        if (this.hp &lt;= 0 &amp;&amp; !this.isDie) {</span>
+<span class="nc" id="L101">            this.hp = 0;</span>
+<span class="nc" id="L102">            this.isDie = true;</span>
+<span class="nc" id="L103">            int currentMana = app.getMana();</span>
+<span class="nc" id="L104">            app.setMana(currentMana + this.manaGainedOnkill * (int)app.getManaGainedMultiplier());</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            if(app.getMana() &gt;= app.getManaCap()){</span>
+<span class="nc" id="L106">                app.setMana(app.getManaCap());</span>
+            }
+        }
+<span class="fc" id="L109">    }</span>
+
+    public boolean getIsDie(){
+<span class="fc" id="L112">        return this.isDie;</span>
+    }
+    public PImage[] getDeathAnimationImages(){
+<span class="fc" id="L115">        return deathAnimationImages;</span>
+    }
+    public int getDeathAnimationFrame(){
+<span class="fc" id="L118">        return deathAnimationFrame;</span>
+    }
+
+    /**
+     * Check if the fireball collided with the monster.
+     * @param fireball
+     * @return
+     */
+    public boolean collide(Fireball fireball){
+<span class="fc" id="L127">        double distance = Math.sqrt((currentX - fireball.getX()) * (currentX - fireball.getX()) + (currentY - fireball.getY()) * (currentY - fireball.getY()));</span>
+<span class="fc" id="L128">        double touchDist = 1;</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        return distance &lt;= touchDist;</span>
+    }
+
+    /**
+     * The monster can be frozen by the fireball of frozenTower.
+     * @param freezeTime
+     */
+    public void freeze(double freezeTime){
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        if(!isFrozen){</span>
+<span class="fc" id="L138">            this.speed = 0;</span>
+<span class="fc" id="L139">            isFrozen = true;</span>
+        }
+<span class="fc" id="L141">        this.freezeTime = freezeTime;</span>
+<span class="fc" id="L142">    }</span>
+
+    /**
+     * Determine which direction the monster will go along the path.
+     */
+    private void updateTarget(){
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        if(count &gt; 0){</span>
+<span class="fc" id="L149">            Point target = path.get(count - 1);</span>
+<span class="fc" id="L150">            targetX = target.getCol() * 32;</span>
+<span class="fc" id="L151">            targetY = target.getRow() * 32 + 40;</span>
+
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">            if(targetY &lt; currentY){</span>
+<span class="nc" id="L154">                moveDirection = &quot;UP&quot;;</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">            }else if(targetY &gt; currentY){</span>
+<span class="fc" id="L156">                moveDirection = &quot;DOWN&quot;;</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">            }else if(targetX &lt; currentX){</span>
+<span class="nc" id="L158">                moveDirection = &quot;LEFT&quot;;</span>
+            }else{
+<span class="fc" id="L160">                moveDirection = &quot;RIGHT&quot;;</span>
+            }
+        }
+<span class="fc" id="L163">    }</span>
+
+    /**
+     * Check if this monster are frozen and the state of this game.
+     * Draw the monster of each wave.
+     * Control how long the monster stays frozen.
+     * If the monster is alive, draw it along the path.
+     * Display the health bar of each monster.
+     * Draw the death animation for monsters with each image lasting 4 frames.
+     * If an enemy reaches the wizard鈥檚 house, it is banished.
+     * And banished monsters respawn correctly and cause a deduction of mana equal to their remaining hp.
+     * @param app
+     * @param countFrame
+     */
+    public void draw(App app, int countFrame){
+<span class="fc bfc" id="L178" title="All 2 branches covered.">       if(countFrame &gt;= accumulatedPause * 60) {</span>
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">            if(count &gt;= 0) {</span>
+
+<span class="fc bfc" id="L181" title="All 2 branches covered.">                if (!isFrozen) {</span>
+<span class="pc bpc" id="L182" title="1 of 2 branches missed.">                    if (app.getIsPpressed()) {</span>
+<span class="nc" id="L183">                        app.setState(GameState.PAUSED);</span>
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">                    } else if (app.getIsFFpressed()) {</span>
+<span class="nc" id="L185">                        app.setState(GameState.DOUBLE_SPEED);</span>
+                    } else {
+<span class="fc" id="L187">                        app.setState(GameState.PLAYING);</span>
+                    }
+
+<span class="pc bpc" id="L190" title="2 of 3 branches missed.">                    switch (app.getState()) {</span>
+                        case PAUSED:
+<span class="nc" id="L192">                            this.speed = 0;</span>
+<span class="nc" id="L193">                            break;</span>
+                        case DOUBLE_SPEED:
+<span class="nc" id="L195">                            this.speed = originalSpeed * 2;</span>
+<span class="nc" id="L196">                            break;</span>
+                        default:
+<span class="fc" id="L198">                            this.speed = originalSpeed;</span>
+                            break;
+                    }
+                }
+
+<span class="pc bpc" id="L203" title="1 of 4 branches missed.">                if(isFrozen &amp;&amp; freezeTime &gt; 0){</span>
+<span class="fc" id="L204">                    freezeTime --;</span>
+<span class="pc bpc" id="L205" title="1 of 2 branches missed.">                    if(freezeTime &lt;= 0){</span>
+<span class="nc" id="L206">                        this.speed = originalSpeed;</span>
+<span class="nc" id="L207">                        isFrozen = false;</span>
+                    }
+                }
+
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">                if(!isDie) {</span>
+<span class="fc" id="L212">                    app.image(type, (float) currentX, (float) currentY);</span>
+                }
+<span class="pc bpc" id="L214" title="3 of 5 branches missed.">                switch(moveDirection){</span>
+                    case &quot;UP&quot;:
+<span class="nc" id="L216">                        currentY -= speed;</span>
+<span class="nc" id="L217">                        break;</span>
+                    case &quot;DOWN&quot;:
+<span class="fc" id="L219">                        currentY += speed;</span>
+<span class="fc" id="L220">                        break;</span>
+                    case &quot;LEFT&quot;:
+<span class="nc" id="L222">                        currentX -= speed;</span>
+<span class="nc" id="L223">                        break;</span>
+                    case &quot;RIGHT&quot;:
+<span class="fc" id="L225">                        currentX += speed;</span>
+                        break;
+                }
+
+<span class="pc bpc" id="L229" title="3 of 8 branches missed.">                if((moveDirection.equals(&quot;UP&quot;) &amp;&amp; currentY &lt;= targetY) || (moveDirection.equals(&quot;DOWN&quot;) &amp;&amp; currentY &gt;= targetY) ||</span>
+<span class="pc bpc" id="L230" title="3 of 4 branches missed.">                        (moveDirection.equals(&quot;LEFT&quot;) &amp;&amp; currentX &lt;= targetX) ||</span>
+<span class="fc bfc" id="L231" title="All 4 branches covered.">                        (moveDirection.equals(&quot;RIGHT&quot;) &amp;&amp; currentX &gt;= targetX)) {</span>
+<span class="fc" id="L232">                    currentX = targetX;</span>
+<span class="fc" id="L233">                    currentY = targetY;</span>
+<span class="fc" id="L234">                    count -= 1;</span>
+<span class="fc" id="L235">                    updateTarget();</span>
+                }
+
+<span class="fc" id="L238">                int totalWidth = 30;</span>
+<span class="fc" id="L239">                int w1 = (int)(((float)hp) / fullHp * totalWidth);</span>
+<span class="fc" id="L240">                int w2 = totalWidth - w1;</span>
+<span class="fc" id="L241">                app.fill(0, 255, 0);</span>
+<span class="fc" id="L242">                app.stroke(0, 255, 0);</span>
+<span class="fc" id="L243">                app.rect(currentX-5, currentY-10, w1, 5);</span>
+
+<span class="fc bfc" id="L245" title="All 2 branches covered.">                if(hp != fullHp){</span>
+<span class="fc" id="L246">                    app.fill(255, 0 , 0);</span>
+<span class="fc" id="L247">                    app.stroke(255, 0, 0);</span>
+<span class="fc" id="L248">                    app.rect(currentX + w1 - 5, currentY-10, w2, 5);</span>
+                }
+
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">                if(this.isDie){</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                    if(deathAnimationFrame &lt; deathAnimationImages.length * 4){</span>
+<span class="nc" id="L253">                        app.image(deathAnimationImages[deathAnimationFrame / 4], (float)currentX, (float)currentY);</span>
+<span class="nc" id="L254">                        deathAnimationFrame++;</span>
+                    }else{
+<span class="nc" id="L256">                        resetDeathAnimation();</span>
+                    }
+                }
+
+<span class="pc bpc" id="L260" title="3 of 4 branches missed.">                if(count == -1 &amp;&amp; !isDie){</span>
+<span class="nc" id="L261">                    app.setMana(app.getMana() - (int) this.hp);</span>
+<span class="nc" id="L262">                    respawn();</span>
+                }
+            }
+        }
+<span class="fc" id="L266">    }</span>
+
+    /**
+     * Respawn the banished monsters with hp &gt; 0;
+     */
+    private void respawn() {
+<span class="nc" id="L272">        this.count = path.size() - 1;</span>
+<span class="nc" id="L273">        Point start = path.get(count);</span>
+<span class="nc" id="L274">        this.currentX = start.getCol() * 32;</span>
+<span class="nc" id="L275">        this.currentY = start.getRow() * 32 + 40;</span>
+<span class="nc" id="L276">        this.isDie = false;</span>
+<span class="nc" id="L277">        updateTarget();</span>
+<span class="nc" id="L278">    }</span>
+
+    /**
+     * Initialize the death animation after the animation of last monster has been finished.
+     */
+    public void resetDeathAnimation() {
+<span class="fc" id="L284">        deathAnimationFrame = 0;</span>
+<span class="fc" id="L285">    }</span>
+
+    public double getArmour() {
+<span class="fc" id="L288">        return this.armour;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

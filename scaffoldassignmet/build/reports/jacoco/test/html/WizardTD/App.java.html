@@ -1,0 +1,1292 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">scaffoldassignmet</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONArray;
+import processing.data.JSONObject;
+import processing.event.KeyEvent;
+import processing.event.MouseEvent;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+
+import java.io.*;
+import java.util.*;
+
+public class App extends PApplet {
+
+    public static final int CELLSIZE = 32;
+    public static final int SIDEBAR = 120;
+    public static final int TOPBAR = 40;
+    public static final int BOARD_WIDTH = 20;
+<span class="fc" id="L23">    public static int WIDTH = CELLSIZE * BOARD_WIDTH + SIDEBAR;</span>
+<span class="fc" id="L24">    public static int HEIGHT = BOARD_WIDTH * CELLSIZE + TOPBAR;</span>
+    public static final int FPS = 60;
+    public static String configPath;
+<span class="fc" id="L27">    public Random random = new Random();</span>
+<span class="fc" id="L28">    public ArrayList&lt;Grass&gt; grasses = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L29">    public ArrayList&lt;Shrub&gt; shrubs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L30">    public ArrayList&lt;Path&gt; paths = new ArrayList&lt;&gt;();</span>
+    public wizardHouse wizardhouse;
+<span class="fc" id="L32">    public char[][] boardlayout = new char[20][20];</span>
+<span class="fc" id="L33">    public ArrayList&lt;Wave&gt; waves = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L34">    public ArrayList&lt;Point&gt; points = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L35">    private int countFrame = 0;</span>
+    public Point end;
+    private int towerRange;
+    private double fireSpeed;
+    private int damage;
+    private int mana;
+    private int manaCap;
+    private int manaGained;
+    private int towerCost;
+<span class="fc" id="L44">    private boolean isTpressed = false;</span>
+<span class="fc" id="L45">    private ArrayList&lt;Tower&gt; towers = new ArrayList&lt;&gt;();</span>
+    private int waveNum;
+<span class="fc" id="L47">    public GameState state = GameState.PLAYING;</span>
+<span class="fc" id="L48">    private boolean isHoverBuildTower = false;</span>
+<span class="fc" id="L49">    private boolean isU1pressed = false;</span>
+<span class="fc" id="L50">    private boolean isU2pressed = false;</span>
+<span class="fc" id="L51">    private boolean isU3pressed = false;</span>
+    private int manaPoolCost;
+    private int manaPoolCostIncrease;
+    private double manaPoolCap;
+    private double manaPoolManaGained;
+<span class="fc" id="L56">    private double manaGainedMultiplier = 1.0;</span>
+<span class="fc" id="L57">    private boolean isMpressed = false;</span>
+<span class="fc" id="L58">    private boolean isHoverManaPool = false;</span>
+<span class="fc" id="L59">    private boolean isPpressed = false;</span>
+<span class="fc" id="L60">    private boolean isFFpressed = false;</span>
+<span class="fc" id="L61">    private boolean isHoverFf = false;</span>
+<span class="fc" id="L62">    private boolean isHoverU1 = false;</span>
+<span class="fc" id="L63">    private boolean isHoverP = false;</span>
+<span class="fc" id="L64">    private boolean isHoverU2 = false;</span>
+<span class="fc" id="L65">    private boolean isHoverU3 = false;</span>
+    private FileReader f1;
+    private JSONObject jsonob;
+<span class="fc" id="L68">    private boolean isU4pressed = false;</span>
+<span class="fc" id="L69">    private boolean isHoverU4 = false;</span>
+    private double freezeTime;
+    private int freezeCost;
+<span class="fc" id="L72">    private int manaCounter = 0;</span>
+
+    // Feel free to add any additional methods or attributes you want. Please put classes in different files.
+
+    /**
+     * check if this path tile is the shape of path1 or not, it has four possible cases.
+     * @param boardlayout the 2D array to describe the layout of the map
+     * @param i the row of layout
+     * @param j the col of layout
+     * @return return the result
+     */
+    public double checkCorner(char[][] boardlayout, int i, int j) {
+<span class="fc bfc" id="L84" title="All 4 branches covered.">        if (j - 1 &gt;= 0 &amp;&amp; i - 1 &gt;= 0) {</span>
+<span class="fc bfc" id="L85" title="All 4 branches covered.">            if (boardlayout[i][j - 1] == 'X' &amp;&amp; boardlayout[i - 1][j] == 'X') {</span>
+<span class="fc" id="L86">                return 90.0;</span>
+            }
+        }
+<span class="pc bpc" id="L89" title="1 of 4 branches missed.">        if (j + 1 &lt; 20 &amp;&amp; i - 1 &gt;= 0) {</span>
+<span class="fc bfc" id="L90" title="All 4 branches covered.">            if (boardlayout[i][j + 1] == 'X' &amp;&amp; boardlayout[i - 1][j] == 'X') {</span>
+<span class="fc" id="L91">                return 180.0;</span>
+            }
+        }
+<span class="pc bpc" id="L94" title="1 of 4 branches missed.">        if (j - 1 &gt;= 0 &amp;&amp; i + 1 &lt; 20) {</span>
+<span class="fc bfc" id="L95" title="All 4 branches covered.">            if (boardlayout[i][j - 1] == 'X' &amp;&amp; boardlayout[i + 1][j] == 'X') {</span>
+<span class="fc" id="L96">                return 0.0;</span>
+            }
+        }
+<span class="pc bpc" id="L99" title="2 of 4 branches missed.">        if (i + 1 &lt; 20 &amp;&amp; j + 1 &lt; 20) {</span>
+<span class="fc bfc" id="L100" title="All 4 branches covered.">            if (boardlayout[i][j + 1] == 'X' &amp;&amp; boardlayout[i + 1][j] == 'X') {</span>
+<span class="fc" id="L101">                return 270.0;</span>
+            }
+        }
+<span class="fc" id="L104">        return -1;</span>
+    }
+
+    /**
+     * check if this path tile is the shape of path3 or not, it has only one possible case.
+     * @param boardlayout the 2D array to describe the layout of the map
+     * @param i the row of layout
+     * @param j the col of layout
+     * @return return the result
+     */
+    public boolean checkIntersection(char[][] boardlayout, int i, int j) {
+<span class="pc bpc" id="L115" title="2 of 8 branches missed.">        if (i + 1 &lt; 20 &amp;&amp; i - 1 &gt;= 0 &amp;&amp; j + 1 &lt; 20 &amp;&amp; j - 1 &gt;= 0) {</span>
+<span class="fc bfc" id="L116" title="All 8 branches covered.">            if (boardlayout[i][j - 1] == 'X' &amp;&amp; boardlayout[i - 1][j] == 'X' &amp;&amp;</span>
+                    boardlayout[i][j + 1] == 'X' &amp;&amp; boardlayout[i + 1][j] == 'X') {
+<span class="fc" id="L118">                return true;</span>
+            }
+        }
+<span class="fc" id="L121">        return false;</span>
+    }
+
+    /**
+     * check if this path tile is the shape of path0 or not, it has two possible cases.
+     * @param boardlayout the 2D array to describe the layout of the map
+     * @param i the row of layout
+     * @param j the col of layout
+     * @return return the result
+     */
+    public double checkDirection(char[][] boardlayout, int i, int j) {
+<span class="fc bfc" id="L132" title="All 4 branches covered.">        if (i - 1 &gt;= 0 &amp;&amp; boardlayout[i - 1][j] == 'X') {</span>
+<span class="fc" id="L133">            return 90.0;</span>
+<span class="pc bpc" id="L134" title="1 of 4 branches missed.">        } else if (i + 1 &lt; 20 &amp;&amp; boardlayout[i + 1][j] == 'X') {</span>
+<span class="fc" id="L135">            return 90.0;</span>
+        } else {
+<span class="fc" id="L137">            return 0.0;</span>
+        }
+    }
+
+    /**
+     * check if this path tile is the shape of path2 or not, it has four possible cases.
+     * @param boardlayout the 2D array to describe the layout of the map
+     * @param i the row of layout
+     * @param j the col of layout
+     * @return return the result
+     */
+    public double checkTriangle(char[][] boardlayout, int i, int j) {
+<span class="pc bpc" id="L149" title="2 of 6 branches missed.">        if (j - 1 &gt;= 0 &amp;&amp; i + 1 &lt; 20 &amp;&amp; j + 1 &lt; 20) {</span>
+<span class="fc bfc" id="L150" title="All 6 branches covered.">            if (boardlayout[i][j - 1] == 'X' &amp;&amp; boardlayout[i][j + 1] == 'X' &amp;&amp;</span>
+                    boardlayout[i + 1][j] == 'X') {
+<span class="fc" id="L152">                return 0.0;</span>
+            }
+        }
+<span class="pc bpc" id="L155" title="2 of 6 branches missed.">        if (i - 1 &gt;= 0 &amp;&amp; j + 1 &lt; 20 &amp;&amp; i + 1 &lt; 20) {</span>
+<span class="fc bfc" id="L156" title="All 6 branches covered.">            if (boardlayout[i - 1][j] == 'X' &amp;&amp; boardlayout[i][j + 1] == 'X' &amp;&amp;</span>
+                    boardlayout[i + 1][j] == 'X') {
+<span class="fc" id="L158">                return 270.0;</span>
+            }
+        }
+<span class="pc bpc" id="L161" title="1 of 6 branches missed.">        if (i - 1 &gt;= 0 &amp;&amp; i + 1 &lt; 20 &amp;&amp; j - 1 &gt;= 0) {</span>
+<span class="fc bfc" id="L162" title="All 6 branches covered.">            if (boardlayout[i][j - 1] == 'X' &amp;&amp; boardlayout[i + 1][j] == 'X' &amp;&amp;</span>
+                    boardlayout[i - 1][j] == 'X') {
+<span class="fc" id="L164">                return 90.0;</span>
+            }
+        }
+<span class="pc bpc" id="L167" title="1 of 6 branches missed.">        if (i - 1 &gt;= 0 &amp;&amp; j + 1 &lt; 20 &amp;&amp; j - 1 &gt;= 0) {</span>
+<span class="fc bfc" id="L168" title="All 6 branches covered.">            if (boardlayout[i][j - 1] == 'X' &amp;&amp; boardlayout[i - 1][j] == 'X' &amp;&amp;</span>
+                    boardlayout[i][j + 1] == 'X') {
+<span class="fc" id="L170">                return 180.0;</span>
+            }
+        }
+<span class="fc" id="L173">        return -1;</span>
+    }
+
+    /**
+     * Generate monster instance and add it to its attributed wave.
+     * @param wave
+     * @param jsonObject
+     * @param end  the end of the path where monster will go
+     * @param duration the time of one wave
+     * @param accumulatedPause the time before one wave
+     */
+    private void generateMonster(Wave wave, JSONObject jsonObject, Point end, int duration, double accumulatedPause) {
+<span class="fc" id="L185">        int quantity = jsonObject.getInt(&quot;quantity&quot;);</span>
+<span class="fc" id="L186">        double interval = duration / (double) quantity;</span>
+
+<span class="fc bfc" id="L188" title="All 2 branches covered.">        for (int i = 0; i &lt; quantity; i++) {</span>
+<span class="fc" id="L189">            int spawnpoint = random.nextInt(points.size());</span>
+<span class="fc" id="L190">            Point start = points.get(spawnpoint);</span>
+
+<span class="fc" id="L192">            ArrayList&lt;Point&gt; path = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L193">            BFSfindPath(path, boardlayout, start, end);</span>
+
+<span class="fc" id="L195">            String type = jsonObject.getString(&quot;type&quot;); // w e12</span>
+<span class="fc" id="L196">            String imagePath = String.format(&quot;src/main/resources/WizardTD/%s.png&quot;, type);</span>
+<span class="fc" id="L197">            PImage img = loadImage(imagePath);</span>
+<span class="fc" id="L198">            double hp = jsonObject.getDouble(&quot;hp&quot;);</span>
+<span class="fc" id="L199">            double speed = jsonObject.getDouble(&quot;speed&quot;);</span>
+<span class="fc" id="L200">            double armour = jsonObject.getDouble((&quot;armour&quot;));</span>
+<span class="fc" id="L201">            int mana_gained_on_kill = jsonObject.getInt(&quot;mana_gained_on_kill&quot;);</span>
+
+<span class="fc" id="L203">            Monster m = new Monster(img, hp, speed, armour, mana_gained_on_kill, path, accumulatedPause, this);</span>
+<span class="fc" id="L204">            wave.addMonster(m);</span>
+<span class="fc" id="L205">            accumulatedPause += interval;</span>
+        }
+<span class="fc" id="L207">    }</span>
+
+    /**
+     * Use BFS algorithm to get a path of one monster.
+     * @param path the path of one monster from its start point to the end point(wizardHouse)
+     * @param boardlayout
+     * @param start the start point of one monster's path
+     * @param end the end point of one monster's path
+     */
+    private void BFSfindPath(ArrayList&lt;Point&gt; path, char[][] boardlayout, Point start, Point end) {
+<span class="fc" id="L217">        Point[][] pre = new Point[20][20];</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">        for (int i = 0; i &lt; 20; i++) {</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">            for (int j = 0; j &lt; 20; j++) {</span>
+<span class="fc" id="L220">                pre[i][j] = null;</span>
+            }
+        }
+
+<span class="fc" id="L224">        ArrayList&lt;Point&gt; queue = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L225">        queue.add(start);</span>
+<span class="fc" id="L226">        pre[start.getRow()][start.getCol()] = start;</span>
+
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">        while (queue.size() &gt; 0) {</span>
+<span class="fc" id="L229">            Point p = queue.remove(0);</span>
+<span class="fc bfc" id="L230" title="All 4 branches covered.">            if (p.getRow() == end.getRow() &amp;&amp; p.getCol() == end.getCol()) {</span>
+<span class="fc" id="L231">                break;</span>
+            }
+<span class="fc" id="L233">            int r = p.getRow();</span>
+<span class="fc" id="L234">            int c = p.getCol();</span>
+<span class="pc bpc" id="L235" title="2 of 6 branches missed.">            if (r + 1 &lt; 20 &amp;&amp; (boardlayout[r + 1][c] == 'X' || boardlayout[r + 1][c] == 'W')) {</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">                if (pre[r + 1][c] == null) {  // if used before</span>
+<span class="fc" id="L237">                    pre[r + 1][c] = p;   // remember the point before it</span>
+<span class="fc" id="L238">                    queue.add(new Point(r + 1, c));</span>
+                }
+            }
+<span class="pc bpc" id="L241" title="1 of 6 branches missed.">            if (r - 1 &gt;= 0 &amp;&amp; (boardlayout[r - 1][c] == 'X' || boardlayout[r - 1][c] == 'W')) {</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">                if (pre[r - 1][c] == null) {</span>
+<span class="fc" id="L243">                    pre[r - 1][c] = p;   // remember the point before it</span>
+<span class="fc" id="L244">                    queue.add(new Point(r - 1, c));</span>
+                }
+            }
+<span class="pc bpc" id="L247" title="2 of 6 branches missed.">            if (c + 1 &lt; 20 &amp;&amp; (boardlayout[r][c + 1] == 'X' || boardlayout[r][c + 1] == 'W')) {</span>
+<span class="fc bfc" id="L248" title="All 2 branches covered.">                if (pre[r][c + 1] == null) {</span>
+<span class="fc" id="L249">                    pre[r][c + 1] = p;   // remember the point before it</span>
+<span class="fc" id="L250">                    queue.add(new Point(r, c + 1));</span>
+                }
+            }
+<span class="fc bfc" id="L253" title="All 6 branches covered.">            if (c - 1 &gt;= 0 &amp;&amp; (boardlayout[r][c - 1] == 'X' || boardlayout[r][c - 1] == 'W')) {</span>
+<span class="fc bfc" id="L254" title="All 2 branches covered.">                if (pre[r][c - 1] == null) {</span>
+<span class="fc" id="L255">                    pre[r][c - 1] = p;   // remember the point before it</span>
+<span class="fc" id="L256">                    queue.add(new Point(r, c - 1));</span>
+                }
+            }
+<span class="fc" id="L259">        }</span>
+<span class="fc" id="L260">        getPath(start, pre, end, path); // Get the path from the pre.</span>
+<span class="fc" id="L261">    }</span>
+
+    /**
+     * Used to be a recursion to help the BFS algorithm to find the path.
+     * @param start
+     * @param pre
+     * @param end
+     * @param path
+     */
+    private void getPath(Point start, Point[][] pre, Point end, ArrayList&lt;Point&gt; path) {
+<span class="fc bfc" id="L271" title="All 4 branches covered.">        if (start.getRow() == end.getRow() &amp;&amp; start.getCol() == end.getCol()) {</span>
+<span class="fc" id="L272">            path.add(start);</span>
+<span class="fc" id="L273">            return;</span>
+        }
+<span class="fc" id="L275">        path.add(end);</span>
+<span class="fc" id="L276">        Point next = pre[end.getRow()][end.getCol()];</span>
+<span class="fc" id="L277">        getPath(start, pre, next, path);</span>
+<span class="fc" id="L278">    }</span>
+
+    /**
+     * Invoked when the mouse cursor has been moved onto a component but no buttons have been pushed.
+     * @param e
+     */
+    public void mouseMoved(MouseEvent e) {
+<span class="fc" id="L285">        int x = e.getX();</span>
+<span class="fc" id="L286">        int y = e.getY();</span>
+
+<span class="fc bfc" id="L288" title="All 2 branches covered.">        for (Tower t : towers) {</span>
+<span class="fc" id="L289">            int xBound = t.getX() + CELLSIZE;</span>
+<span class="fc" id="L290">            int yBound = t.getY() + CELLSIZE;</span>
+<span class="fc bfc" id="L291" title="All 8 branches covered.">            if (x &lt;= xBound &amp;&amp; x &gt;= t.getX() &amp;&amp; y &lt;= yBound &amp;&amp; y &gt;= t.getY()) {</span>
+<span class="fc" id="L292">                t.setIsHover(true);</span>
+            } else {
+<span class="fc" id="L294">                t.setIsHover(false);</span>
+            }
+<span class="fc" id="L296">        }</span>
+
+<span class="fc" id="L298">        isHoverBuildTower = false;</span>
+<span class="fc" id="L299">        isHoverManaPool = false;</span>
+<span class="fc" id="L300">        isHoverP = false;</span>
+<span class="fc" id="L301">        isHoverFf = false;</span>
+<span class="fc" id="L302">        isHoverU1 = false;</span>
+<span class="fc" id="L303">        isHoverU2 = false;</span>
+<span class="fc" id="L304">        isHoverU3 = false;</span>
+<span class="fc" id="L305">        isHoverU4 = false;</span>
+
+<span class="pc bpc" id="L307" title="1 of 4 branches missed.">        if (x &gt;= 645 &amp;&amp; x &lt;= 695) {</span>
+<span class="fc bfc" id="L308" title="All 4 branches covered.">            if (y &gt;= 200 &amp;&amp; y &lt;= 250) {</span>
+<span class="fc" id="L309">                isHoverBuildTower = true;</span>
+<span class="fc bfc" id="L310" title="All 4 branches covered.">            } else if (y &gt;= 440 &amp;&amp; y &lt;= 490) {</span>
+<span class="fc" id="L311">                isHoverManaPool = true;</span>
+<span class="fc bfc" id="L312" title="All 4 branches covered.">            } else if (y &gt;= 140 &amp;&amp; y &lt;= 190) {</span>
+<span class="fc" id="L313">                isHoverP = true;</span>
+<span class="pc bpc" id="L314" title="1 of 4 branches missed.">            } else if (y &gt;= 80 &amp;&amp; y &lt;= 130) {</span>
+<span class="fc" id="L315">                isHoverFf = true;</span>
+<span class="pc bpc" id="L316" title="1 of 4 branches missed.">            } else if (y &gt;= 260 &amp;&amp; y &lt;= 310) {</span>
+<span class="fc" id="L317">                isHoverU1 = true;</span>
+<span class="pc bpc" id="L318" title="1 of 4 branches missed.">            } else if (y &gt;= 320 &amp;&amp; y &lt;= 370) {</span>
+<span class="fc" id="L319">                isHoverU2 = true;</span>
+<span class="pc bpc" id="L320" title="1 of 4 branches missed.">            } else if (y &gt;= 380 &amp;&amp; y &lt;= 430) {</span>
+<span class="fc" id="L321">                isHoverU3 = true;</span>
+<span class="pc bpc" id="L322" title="2 of 4 branches missed.">            } else if (y &gt;= 500 &amp;&amp; y &lt;= 550) {</span>
+<span class="fc" id="L323">                isHoverU4 = true;</span>
+            }
+        }
+<span class="fc" id="L326">    }</span>
+
+    /**
+     * Check if this tile can be set a tower.
+     * @param boardlayout
+     * @param x
+     * @param y
+     * @return
+     */
+    public boolean checkValidPlace(char[][] boardlayout, int x, int y) {
+<span class="fc bfc" id="L336" title="All 4 branches covered.">        if (x &lt; 0 || x &gt;= 640) {</span>
+<span class="fc" id="L337">            return false;</span>
+        }
+<span class="fc bfc" id="L339" title="All 4 branches covered.">        if (y &lt; 40 || y &gt;= 680) {</span>
+<span class="fc" id="L340">            return false;</span>
+        }
+<span class="fc" id="L342">        int row = (y - TOPBAR) / CELLSIZE;</span>
+<span class="fc" id="L343">        int col = x / CELLSIZE;</span>
+<span class="fc bfc" id="L344" title="All 2 branches covered.">        if (boardlayout[row][col] == ' ') {</span>
+<span class="fc" id="L345">            boardlayout[row][col] = 'T';</span>
+<span class="fc" id="L346">            return true;</span>
+        }
+<span class="fc" id="L348">        return false;</span>
+    }
+
+    /**
+     * Getter of mana.
+     * @return
+     */
+    public int getMana() {
+<span class="fc" id="L356">        return this.mana;</span>
+    }
+
+    /**
+     * Getter of manaCap.
+     * @return
+     */
+    public int getManaCap() {
+<span class="fc" id="L364">        return this.manaCap;</span>
+    }
+
+    /**
+     * Setter of mana.
+     * @param mana
+     */
+    public void setMana(int mana) {
+<span class="fc" id="L372">        this.mana = mana;</span>
+<span class="fc" id="L373">    }</span>
+
+    /**
+     * Getter of isTpressed.
+     * @return
+     */
+    public boolean getIsTpressed() {
+<span class="fc" id="L380">        return this.isTpressed;</span>
+    }
+
+    /**
+     * Getter of isU1pressed.
+     * @return
+     */
+    public boolean getIsU1pressed() {
+<span class="fc" id="L388">        return this.isU1pressed;</span>
+    }
+
+    /**
+     * Getter of isU2pressed.
+     * @return
+     */
+    public boolean getIsU2pressed() {
+<span class="fc" id="L396">        return this.isU2pressed;</span>
+    }
+
+    /**
+     * Getter of isU3pressed.
+     * @return
+     */
+    public boolean getIsU3pressed() {
+<span class="fc" id="L404">        return this.isU3pressed;</span>
+    }
+
+    /**
+     * Getter of isU4pressed.
+     * @return
+     */
+    public boolean getIsU4pressed() {
+<span class="fc" id="L412">        return this.isU4pressed;</span>
+    }
+
+    /**
+     * Getter of manaGainedMultiplier.
+     * @return
+     */
+    public double getManaGainedMultiplier() {
+<span class="fc" id="L420">        return this.manaGainedMultiplier;</span>
+    }
+
+    /**
+     * Getter of towers.
+     * @return
+     */
+    public ArrayList&lt;Tower&gt; getTowers() {
+<span class="fc" id="L428">        return this.towers;</span>
+    }
+
+    /**
+     * Figure out what the next wave of monsters is.
+     * @param countFrame
+     * @return
+     */
+    private int findWave(int countFrame) {
+
+<span class="fc" id="L438">        int waveNumber = 1;</span>
+<span class="fc" id="L439">        double totalTime = 0;</span>
+
+<span class="pc bpc" id="L441" title="1 of 2 branches missed.">        for (Wave w : waves) {</span>
+<span class="fc" id="L442">            totalTime += w.getPre_wave_pause();</span>
+
+<span class="fc bfc" id="L444" title="All 2 branches covered.">            if (countFrame &lt; totalTime * 60) {</span>
+<span class="fc" id="L445">                return waveNumber;</span>
+            }
+<span class="fc" id="L447">            totalTime += w.getDuration();</span>
+
+<span class="pc bpc" id="L449" title="1 of 2 branches missed.">            if (countFrame &lt; totalTime * 60) {</span>
+<span class="fc" id="L450">                return waveNumber + 1;</span>
+            }
+<span class="nc" id="L452">            waveNumber++;</span>
+<span class="nc" id="L453">        }</span>
+<span class="nc" id="L454">        return -1;</span>
+    }
+
+    /**
+     * Figure out how long until the next monster arrives.
+     * @param countFrame
+     * @return
+     */
+    private int findWaveStartTime(int countFrame) {
+<span class="fc" id="L463">        int totalTime = 0;</span>
+
+<span class="pc bpc" id="L465" title="1 of 2 branches missed.">        for (Wave w : waves) {</span>
+<span class="fc" id="L466">            totalTime += (int) (w.getPre_wave_pause() * 60);</span>
+
+<span class="fc bfc" id="L468" title="All 2 branches covered.">            if (countFrame &lt; totalTime) {</span>
+<span class="fc" id="L469">                return totalTime / 60;</span>
+            }
+
+<span class="fc" id="L472">            totalTime += w.getDuration() * 60;</span>
+<span class="fc" id="L473">        }</span>
+<span class="nc" id="L474">        return -1;</span>
+    }
+
+    /**
+     * Start the manaPool function.
+     */
+    private void castManaPoolSpell() {
+
+<span class="fc" id="L482">        double increment = manaPoolManaGained - 1.0;</span>
+
+<span class="pc bpc" id="L484" title="1 of 2 branches missed.">        if (mana &gt;= manaPoolCost) {</span>
+<span class="fc" id="L485">            mana -= manaPoolCost;</span>
+<span class="fc" id="L486">            manaCap *= (int) manaPoolCap;</span>
+<span class="fc" id="L487">            manaGainedMultiplier += increment;</span>
+<span class="fc" id="L488">            manaPoolCost = manaPoolCost + manaPoolCostIncrease;</span>
+        }
+<span class="fc" id="L490">    }</span>
+
+    /**
+     * Draw different color of the key area when this key are pressed or hovered.
+     * @param x
+     * @param y
+     * @param isHover
+     * @param isPressed
+     */
+    private void drawKey(int x, int y, boolean isHover, boolean isPressed) {
+<span class="fc" id="L500">        stroke(0);</span>
+<span class="fc bfc" id="L501" title="All 2 branches covered.">        if (isPressed) {</span>
+<span class="fc" id="L502">            fill(255, 255, 0);</span>
+<span class="fc bfc" id="L503" title="All 2 branches covered.">        } else if (isHover) {</span>
+<span class="fc" id="L504">            fill(169, 169, 169);</span>
+        }
+<span class="fc" id="L506">        rect(x, y, 50, 50);</span>
+<span class="fc" id="L507">    }</span>
+
+    /**
+     * Check if the player wins the game or not by testing if all monsters of all waves are died.
+     */
+    private void checkWin() {
+<span class="fc bfc" id="L513" title="All 2 branches covered.">        if (state == GameState.LOST) {</span>
+<span class="fc" id="L514">            return;</span>
+        }
+
+<span class="fc bfc" id="L517" title="All 2 branches covered.">        for (Wave w : waves) {</span>
+<span class="pc bpc" id="L518" title="1 of 2 branches missed.">            for (Monster m : w.getMonsters()) {</span>
+<span class="pc bpc" id="L519" title="1 of 2 branches missed.">                if (!m.getIsDie()) {</span>
+<span class="fc" id="L520">                    return;</span>
+                }
+<span class="nc" id="L522">            }</span>
+<span class="nc" id="L523">        }</span>
+<span class="fc" id="L524">        state = GameState.WON;</span>
+<span class="fc" id="L525">    }</span>
+
+    /**
+     * Check if the player loses the game or not by testing if the mana is less than zero.
+     */
+    private void checkLose() {
+<span class="pc bpc" id="L531" title="1 of 2 branches missed.">        if (getMana() &lt; 0) {</span>
+<span class="nc" id="L532">            state = GameState.LOST;</span>
+        }
+<span class="fc" id="L534">    }</span>
+
+    /**
+     * Restart the game when losing the game and initialize the game data from the json.
+     */
+    private void resetGame() {
+
+<span class="fc" id="L541">        state = GameState.PLAYING;</span>
+
+<span class="fc" id="L543">        waves.clear();</span>
+<span class="fc" id="L544">        points.clear();</span>
+<span class="fc" id="L545">        towers.clear();</span>
+
+<span class="fc" id="L547">        countFrame = 0;</span>
+
+        JSONArray jsonArray;
+<span class="fc" id="L550">        jsonArray = (JSONArray) jsonob.get(&quot;waves&quot;);</span>
+<span class="fc" id="L551">        double accumulatedPause = 0;</span>
+<span class="fc" id="L552">        double totalDuration = 0;</span>
+
+<span class="fc bfc" id="L554" title="All 2 branches covered.">        for (int k = 0; k &lt; 20; k++) {</span>
+<span class="fc bfc" id="L555" title="All 2 branches covered.">            if (boardlayout[0][k] == 'X') {</span>
+<span class="fc" id="L556">                points.add(new Point(0, k));</span>
+            }
+<span class="pc bpc" id="L558" title="1 of 2 branches missed.">            if (boardlayout[19][k] == 'X') {</span>
+<span class="nc" id="L559">                points.add(new Point(19, k));</span>
+            }
+<span class="fc bfc" id="L561" title="All 2 branches covered.">            if (boardlayout[k][0] == 'X') {</span>
+<span class="fc" id="L562">                points.add(new Point(k, 0));</span>
+            }
+<span class="pc bpc" id="L564" title="1 of 2 branches missed.">            if (boardlayout[k][19] == 'X') {</span>
+<span class="nc" id="L565">                points.add(new Point(k, 19));</span>
+            }
+        }
+
+<span class="fc bfc" id="L569" title="All 2 branches covered.">        for (int i = 0; i &lt; jsonArray.size(); i++) {</span>
+<span class="fc" id="L570">            JSONObject perwave = (JSONObject) jsonArray.get(i);</span>
+<span class="fc" id="L571">            int duration = perwave.getInt(&quot;duration&quot;);</span>
+<span class="fc" id="L572">            double pre_wave_Pause = perwave.getDouble(&quot;pre_wave_pause&quot;);</span>
+<span class="fc bfc" id="L573" title="All 2 branches covered.">            if (i &gt; 0) {</span>
+<span class="fc" id="L574">                accumulatedPause += totalDuration;</span>
+            }
+<span class="fc" id="L576">            accumulatedPause += pre_wave_Pause;</span>
+<span class="fc" id="L577">            totalDuration = duration;</span>
+
+<span class="fc" id="L579">            Wave wave = new Wave(duration, pre_wave_Pause);</span>
+<span class="fc" id="L580">            JSONArray monsterArray = (JSONArray) perwave.get(&quot;monsters&quot;);</span>
+<span class="fc bfc" id="L581" title="All 2 branches covered.">            for (int j = 0; j &lt; monsterArray.size(); j++) {</span>
+
+<span class="fc" id="L583">                generateMonster(wave, (JSONObject) monsterArray.get(j), end, duration, accumulatedPause);</span>
+            }
+<span class="fc" id="L585">            waves.add(wave);</span>
+        }
+
+<span class="fc" id="L588">        this.towerRange = jsonob.getInt(&quot;initial_tower_range&quot;);</span>
+<span class="fc" id="L589">        this.fireSpeed = jsonob.getDouble(&quot;initial_tower_firing_speed&quot;);</span>
+<span class="fc" id="L590">        this.damage = jsonob.getInt(&quot;initial_tower_damage&quot;);</span>
+<span class="fc" id="L591">        this.mana = jsonob.getInt(&quot;initial_mana&quot;);</span>
+<span class="fc" id="L592">        this.manaCap = jsonob.getInt(&quot;initial_mana_cap&quot;);</span>
+<span class="fc" id="L593">        this.manaGained = jsonob.getInt(&quot;initial_mana_gained_per_second&quot;);</span>
+<span class="fc" id="L594">        this.towerCost = jsonob.getInt(&quot;tower_cost&quot;);</span>
+
+<span class="fc" id="L596">        this.manaPoolCost = jsonob.getInt(&quot;mana_pool_spell_initial_cost&quot;);</span>
+<span class="fc" id="L597">        this.manaPoolCostIncrease = jsonob.getInt(&quot;mana_pool_spell_cost_increase_per_use&quot;);</span>
+<span class="fc" id="L598">        this.manaPoolCap = jsonob.getDouble(&quot;mana_pool_spell_cap_multiplier&quot;);</span>
+<span class="fc" id="L599">        this.manaPoolManaGained = jsonob.getDouble(&quot;mana_pool_spell_mana_gained_multiplier&quot;);</span>
+
+<span class="fc" id="L601">        this.freezeTime = jsonob.getDouble(&quot;freeze time of frozen tower&quot;);</span>
+<span class="fc" id="L602">        this.freezeCost = jsonob.getInt(&quot;freeze tower upgrade cost&quot;);</span>
+<span class="fc" id="L603">    }</span>
+
+    /**
+     * Constructor of App
+     */
+<span class="fc" id="L608">    public App() {</span>
+<span class="fc" id="L609">        this.configPath = &quot;config.json&quot;;</span>
+<span class="fc" id="L610">    }</span>
+
+    /**
+     * Initialise the setting of the window size.
+     */
+    @Override
+    public void settings() {
+<span class="fc" id="L617">        size(WIDTH, HEIGHT);</span>
+
+<span class="fc" id="L619">    }</span>
+
+    /**
+     * Load all resources such as images. Initialise the elements such as the player, enemies and map elements.
+     */
+    @Override
+    public void setup() {
+<span class="fc" id="L626">        frameRate(FPS);</span>
+
+        try {
+<span class="fc" id="L629">            f1 = new FileReader(this.configPath);</span>
+<span class="nc" id="L630">        } catch (FileNotFoundException e) {</span>
+<span class="nc" id="L631">            throw new RuntimeException(e);</span>
+<span class="fc" id="L632">        }</span>
+<span class="fc" id="L633">        jsonob = new JSONObject(f1);</span>
+<span class="fc" id="L634">        String layout = jsonob.getString(&quot;layout&quot;);</span>
+<span class="fc" id="L635">        File f2 = null;</span>
+<span class="fc" id="L636">        f2 = new File(layout);</span>
+<span class="fc" id="L637">        BufferedReader br = null;</span>
+        try {
+<span class="fc" id="L639">            br = new BufferedReader(new FileReader(f2));</span>
+<span class="nc" id="L640">        } catch (FileNotFoundException e) {</span>
+<span class="nc" id="L641">            throw new RuntimeException(e);</span>
+<span class="fc" id="L642">        }</span>
+<span class="fc" id="L643">        int count = 0;</span>
+        String line;
+        while (true) {
+            try {
+<span class="fc bfc" id="L647" title="All 2 branches covered.">                if ((line = br.readLine()) == null) break;</span>
+<span class="nc" id="L648">            } catch (IOException e) {</span>
+<span class="nc" id="L649">                throw new RuntimeException(e);</span>
+<span class="fc" id="L650">            }</span>
+<span class="fc bfc" id="L651" title="All 2 branches covered.">            for (int i = 0; i &lt; line.length(); i++) {</span>
+<span class="fc" id="L652">                boardlayout[count][i] = line.charAt(i);</span>
+            }
+<span class="fc bfc" id="L654" title="All 2 branches covered.">            for (int i = line.length(); i &lt; BOARD_WIDTH; i++) {</span>
+<span class="fc" id="L655">                boardlayout[count][i] = ' ';</span>
+            }
+<span class="fc" id="L657">            count++;</span>
+        }
+
+        double degree;
+<span class="fc bfc" id="L661" title="All 2 branches covered.">        for (int i = 0; i &lt; 20; i++) {</span>
+<span class="fc bfc" id="L662" title="All 2 branches covered.">            for (int j = 0; j &lt; 20; j++) {</span>
+<span class="fc" id="L663">                char c = boardlayout[i][j];</span>
+<span class="fc bfc" id="L664" title="All 2 branches covered.">                if (c == ' ') {</span>
+<span class="fc" id="L665">                    grasses.add(new Grass(loadImage(&quot;src/main/resources/WizardTD/grass.png&quot;), CELLSIZE * j, TOPBAR + CELLSIZE * i));</span>
+                }
+<span class="fc bfc" id="L667" title="All 2 branches covered.">                if (c == 'S') {</span>
+<span class="fc" id="L668">                    shrubs.add(new Shrub(loadImage(&quot;src/main/resources/WizardTD/shrub.png&quot;), CELLSIZE * j, TOPBAR + CELLSIZE * i));</span>
+                }
+<span class="fc bfc" id="L670" title="All 2 branches covered.">                if (c == 'X') {</span>
+<span class="fc bfc" id="L671" title="All 2 branches covered.">                    if (this.checkIntersection(boardlayout, i, j)) {</span>
+<span class="fc" id="L672">                        paths.add(new Path(loadImage(&quot;src/main/resources/WizardTD/path3.png&quot;), CELLSIZE * j, TOPBAR + CELLSIZE * i));</span>
+<span class="fc bfc" id="L673" title="All 2 branches covered.">                    } else if ((degree = checkTriangle(boardlayout, i, j)) &gt;= 0) {</span>
+<span class="fc" id="L674">                        paths.add(new Path(rotateImageByDegrees(loadImage(&quot;src/main/resources/WizardTD/path2.png&quot;), degree), CELLSIZE * j, TOPBAR + CELLSIZE * i));</span>
+<span class="fc bfc" id="L675" title="All 2 branches covered.">                    } else if ((degree = checkCorner(boardlayout, i, j)) &gt;= 0) {</span>
+<span class="fc" id="L676">                        paths.add(new Path(rotateImageByDegrees(loadImage(&quot;src/main/resources/WizardTD/path1.png&quot;), degree), CELLSIZE * j, TOPBAR + CELLSIZE * i));</span>
+                    } else {
+<span class="fc" id="L678">                        degree = checkDirection(boardlayout, i, j);</span>
+<span class="fc" id="L679">                        paths.add(new Path(rotateImageByDegrees(loadImage(&quot;src/main/resources/WizardTD/path0.png&quot;), degree), CELLSIZE * j, TOPBAR + CELLSIZE * i));</span>
+                    }
+                }
+<span class="fc bfc" id="L682" title="All 2 branches covered.">                if (c == 'W') {</span>
+<span class="fc" id="L683">                    wizardhouse = new wizardHouse(loadImage(&quot;src/main/resources/WizardTD/wizard_house.png&quot;), CELLSIZE * j - 8, TOPBAR + CELLSIZE * i - 8);</span>
+<span class="fc" id="L684">                    end = new Point(i, j);</span>
+                }
+
+            }
+        }
+<span class="fc" id="L689">        resetGame();</span>
+<span class="fc" id="L690">    }</span>
+
+    /**
+     * Receive key pressed signal from the keyboard.
+     */
+    @Override
+    public void keyPressed(KeyEvent e) {
+<span class="fc" id="L697">        int key = e.getKeyCode();</span>
+<span class="fc bfc" id="L698" title="All 2 branches covered.">        if (key == 84) {</span>
+<span class="fc" id="L699">            isTpressed = true;</span>
+        }
+<span class="fc bfc" id="L701" title="All 2 branches covered.">        if (key == 49) {</span>
+<span class="fc" id="L702">            isU1pressed = true;</span>
+        }
+<span class="fc bfc" id="L704" title="All 2 branches covered.">        if (key == 50) {</span>
+<span class="fc" id="L705">            isU2pressed = true;</span>
+        }
+<span class="fc bfc" id="L707" title="All 2 branches covered.">        if (key == 51) {</span>
+<span class="fc" id="L708">            isU3pressed = true;</span>
+        }
+<span class="fc bfc" id="L710" title="All 2 branches covered.">        if (key == 77) {</span>
+<span class="fc" id="L711">            isMpressed = true;</span>
+        }
+<span class="fc bfc" id="L713" title="All 2 branches covered.">        if (key == 80) {</span>
+<span class="fc" id="L714">            isPpressed = true;</span>
+        }
+<span class="fc bfc" id="L716" title="All 2 branches covered.">        if (key == 70) {</span>
+<span class="fc" id="L717">            isFFpressed = true;</span>
+        }
+<span class="pc bpc" id="L719" title="1 of 4 branches missed.">        if (key == 82 &amp;&amp; state == GameState.LOST) {</span>
+<span class="fc" id="L720">            resume();</span>
+<span class="fc" id="L721">            resetGame();</span>
+        }
+<span class="fc bfc" id="L723" title="All 2 branches covered.">        if (key == 52) {</span>
+<span class="fc" id="L724">            isU4pressed = true;</span>
+        }
+<span class="fc" id="L726">    }</span>
+
+    /**
+     * Receive key released signal from the keyboard.
+     */
+    @Override
+    public void keyReleased(KeyEvent e) {
+<span class="fc" id="L733">        int key = e.getKeyCode();</span>
+<span class="fc bfc" id="L734" title="All 2 branches covered.">        if (key == 84) {</span>
+<span class="fc" id="L735">            isTpressed = false;</span>
+        }
+<span class="fc bfc" id="L737" title="All 2 branches covered.">        if (key == 49) {</span>
+<span class="fc" id="L738">            isU1pressed = false;</span>
+        }
+<span class="fc bfc" id="L740" title="All 2 branches covered.">        if (key == 50) {</span>
+<span class="fc" id="L741">            isU2pressed = false;</span>
+        }
+<span class="fc bfc" id="L743" title="All 2 branches covered.">        if (key == 51) {</span>
+<span class="fc" id="L744">            isU3pressed = false;</span>
+        }
+<span class="fc bfc" id="L746" title="All 2 branches covered.">        if (key == 77) {</span>
+<span class="fc" id="L747">            isMpressed = false;</span>
+        }
+<span class="fc bfc" id="L749" title="All 2 branches covered.">        if (key == 80) {</span>
+<span class="fc" id="L750">            isPpressed = false;</span>
+        }
+<span class="fc bfc" id="L752" title="All 2 branches covered.">        if (key == 70) {</span>
+<span class="fc" id="L753">            isFFpressed = false;</span>
+        }
+<span class="fc bfc" id="L755" title="All 2 branches covered.">        if (key == 52) {</span>
+<span class="fc" id="L756">            isU4pressed = false;</span>
+        }
+<span class="fc" id="L758">    }</span>
+
+    /**
+     * Invoked when a mouse button has been pressed on a component.
+     * Set a tower in a valid place.
+     * Upgrade the range/speed/damage level of one tower or add a freeze function to a tower.
+     * Activate the ManaPool Spell function.
+     * @param e
+     */
+    @Override
+    public void mousePressed(MouseEvent e) {
+<span class="fc" id="L769">        int x = e.getX();</span>
+<span class="fc" id="L770">        int y = e.getY();</span>
+
+<span class="pc bpc" id="L772" title="1 of 4 branches missed.">        if (x &gt;= 645 &amp;&amp; x &lt;= 695) {</span>
+<span class="fc bfc" id="L773" title="All 4 branches covered.">            if (y &gt;= 200 &amp;&amp; y &lt;= 250) {</span>
+<span class="fc bfc" id="L774" title="All 2 branches covered.">                isTpressed = !isTpressed;</span>
+<span class="fc bfc" id="L775" title="All 4 branches covered.">            } else if (y &gt;= 260 &amp;&amp; y &lt;= 310) {</span>
+<span class="fc bfc" id="L776" title="All 2 branches covered.">                isU1pressed = !isU1pressed;</span>
+<span class="fc bfc" id="L777" title="All 4 branches covered.">            } else if (y &gt;= 320 &amp;&amp; y &lt;= 370) {</span>
+<span class="fc bfc" id="L778" title="All 2 branches covered.">                isU2pressed = !isU2pressed;</span>
+<span class="fc bfc" id="L779" title="All 4 branches covered.">            } else if (y &gt;= 380 &amp;&amp; y &lt;= 430) {</span>
+<span class="fc bfc" id="L780" title="All 2 branches covered.">                isU3pressed = !isU3pressed;</span>
+<span class="fc bfc" id="L781" title="All 4 branches covered.">            } else if (y &gt;= 440 &amp;&amp; y &lt;= 490) {</span>
+<span class="fc bfc" id="L782" title="All 2 branches covered.">                isMpressed = !isMpressed;</span>
+<span class="fc bfc" id="L783" title="All 4 branches covered.">            } else if (y &gt;= 140 &amp;&amp; y &lt;= 190) {</span>
+<span class="fc bfc" id="L784" title="All 2 branches covered.">                isPpressed = !isPpressed;</span>
+<span class="pc bpc" id="L785" title="1 of 4 branches missed.">            } else if (y &gt;= 80 &amp;&amp; y &lt;= 130) {</span>
+<span class="fc bfc" id="L786" title="All 2 branches covered.">                isFFpressed = !isFFpressed;</span>
+<span class="pc bpc" id="L787" title="2 of 4 branches missed.">            } else if (y &gt;= 500 &amp;&amp; y &lt;= 550) {</span>
+<span class="fc bfc" id="L788" title="All 2 branches covered.">                isU4pressed = !isU4pressed;</span>
+            }
+        }
+
+<span class="fc bfc" id="L792" title="All 2 branches covered.">        if (isTpressed) {</span>
+<span class="pc bpc" id="L793" title="1 of 2 branches missed.">            if (checkValidPlace(boardlayout, x, y)) {</span>
+<span class="nc bnc" id="L794" title="All 2 branches missed.">                if (mana &gt;= towerCost) {</span>
+<span class="nc" id="L795">                    int row = (y - TOPBAR) / CELLSIZE;</span>
+<span class="nc" id="L796">                    int col = x / CELLSIZE;</span>
+<span class="nc" id="L797">                    x = CELLSIZE * col;</span>
+<span class="nc" id="L798">                    y = CELLSIZE * row + TOPBAR;</span>
+
+<span class="nc" id="L800">                    Tower t = new Tower(towerRange, fireSpeed, damage, x, y, loadImage(&quot;src/main/resources/WizardTD/tower0.png&quot;), freezeTime);</span>
+<span class="nc" id="L801">                    towers.add(t);</span>
+
+<span class="nc" id="L803">                    this.setMana(mana - towerCost);</span>
+                }
+            }
+        }
+
+<span class="fc bfc" id="L808" title="All 2 branches covered.">        for (Tower t : towers) {</span>
+<span class="pc bpc" id="L809" title="4 of 8 branches missed.">            if (x &gt;= t.getX() &amp;&amp; x &lt; t.getX() + CELLSIZE &amp;&amp; y &gt;= t.getY() &amp;&amp; y &lt;= t.getY() + CELLSIZE) {</span>
+<span class="pc bpc" id="L810" title="1 of 2 branches missed.">                if (isU1pressed) {</span>
+<span class="fc" id="L811">                    int currentU1Level = t.getRangeLevel() + 1;</span>
+<span class="fc" id="L812">                    int requireMana = t.upgradeCost(currentU1Level);</span>
+
+<span class="pc bpc" id="L814" title="1 of 2 branches missed.">                    if (mana &gt;= requireMana) {</span>
+<span class="fc" id="L815">                        t.upgradeRange();</span>
+<span class="fc" id="L816">                        mana = mana - requireMana;</span>
+                    }
+                }
+<span class="pc bpc" id="L819" title="1 of 2 branches missed.">                if (isU2pressed) {</span>
+<span class="fc" id="L820">                    int currentU2Level = t.getSpeedLevel() + 1;</span>
+<span class="fc" id="L821">                    int requireMana = t.upgradeCost(currentU2Level);</span>
+
+<span class="pc bpc" id="L823" title="1 of 2 branches missed.">                    if (mana &gt;= requireMana) {</span>
+<span class="fc" id="L824">                        t.upgradeSpeed();</span>
+<span class="fc" id="L825">                        mana = mana - requireMana;</span>
+                    }
+                }
+<span class="pc bpc" id="L828" title="1 of 2 branches missed.">                if (isU3pressed) {</span>
+<span class="fc" id="L829">                    int currentU3Level = t.getDamageLevel() + 1;</span>
+<span class="fc" id="L830">                    int requireMana = t.upgradeCost(currentU3Level);</span>
+
+<span class="pc bpc" id="L832" title="1 of 2 branches missed.">                    if (mana &gt;= requireMana) {</span>
+<span class="fc" id="L833">                        t.upgradeDamage();</span>
+<span class="fc" id="L834">                        mana = mana - requireMana;</span>
+                    }
+                }
+<span class="pc bpc" id="L837" title="1 of 2 branches missed.">                if (isU4pressed) {</span>
+<span class="pc bpc" id="L838" title="2 of 4 branches missed.">                    if (mana &gt;= freezeCost &amp;&amp; !(t.getHasBeenFrozen())) {</span>
+<span class="fc" id="L839">                        mana = mana - freezeCost;</span>
+<span class="fc" id="L840">                        t.setHasBeenFrozen(true);</span>
+<span class="fc" id="L841">                        t.setIsFreezeTower(true);</span>
+                    }
+                }
+                break;
+            }
+<span class="nc" id="L846">        }</span>
+
+<span class="fc bfc" id="L848" title="All 2 branches covered.">        if (isMpressed) {</span>
+<span class="fc" id="L849">            castManaPoolSpell();</span>
+        }
+<span class="fc" id="L851">    }</span>
+
+    /**
+     * Invoked when a mouse button has been released on a component.
+     * @param e
+     */
+    @Override
+    public void mouseReleased(MouseEvent e) {
+<span class="nc" id="L859">    }</span>
+
+    /*@Override
+    public void mouseDragged(MouseEvent e) {
+
+    }*/
+
+    /**
+     * Draw all elements in the game by current frame.
+     * Check win or lose.
+     * Set Timer of this game.
+     * Set the background color of this game.
+     * Draw the map element.
+     * Draw each wave with their monsters.
+     * Draw the tower which has been set.
+     * indicate the time in seconds until the next wave begins with 鈥淲ave &lt;x&gt; starts: &lt;s&gt;鈥�. If the last wave has begun, display nothing.
+     * Display the mana bar.
+     * Calculate the mana with gained per second.
+     * Draw the game control action area.
+     * Display the tooltip for towerCost.
+     * Display the tooltip for ManaPool.
+     * Display the tooltip for freeze towerCost.
+     */
+    @Override
+    public void draw() {
+
+<span class="fc" id="L885">        checkLose();</span>
+<span class="fc" id="L886">        checkWin();</span>
+<span class="fc bfc" id="L887" title="All 2 branches covered.">        if (state == GameState.WON) {</span>
+<span class="fc" id="L888">            textSize(100);</span>
+<span class="fc" id="L889">            text(&quot;YOU WIN&quot;, 150, HEIGHT / 2);</span>
+<span class="fc" id="L890">            pause();</span>
+<span class="fc" id="L891">            return;</span>
+<span class="fc bfc" id="L892" title="All 2 branches covered.">        } else if (state == GameState.LOST) {</span>
+<span class="fc" id="L893">            textSize(80);</span>
+<span class="fc" id="L894">            text(&quot;YOU LOST&quot;, 160, HEIGHT / 2);</span>
+<span class="fc" id="L895">            textSize(60);</span>
+<span class="fc" id="L896">            text(&quot;Press 'r' to restart&quot;, 100, HEIGHT / 2 + 80);</span>
+<span class="fc" id="L897">            pause();</span>
+<span class="fc" id="L898">            return;</span>
+        }
+
+<span class="pc bpc" id="L901" title="1 of 2 branches missed.">        if(!isPpressed) {</span>
+<span class="fc bfc" id="L902" title="All 2 branches covered.">            if (isFFpressed) {</span>
+<span class="fc" id="L903">                countFrame += 2;</span>
+            } else {
+<span class="fc" id="L905">                countFrame += 1;</span>
+            }
+        }
+
+<span class="fc" id="L909">        background(139, 121, 94);</span>
+
+<span class="fc bfc" id="L911" title="All 2 branches covered.">        for (int i = 0; i &lt; grasses.size(); i++) {</span>
+<span class="fc" id="L912">            grasses.get(i).draw(this);</span>
+        }
+<span class="fc bfc" id="L914" title="All 2 branches covered.">        for (int i = 0; i &lt; shrubs.size(); i++) {</span>
+<span class="fc" id="L915">            shrubs.get(i).draw(this);</span>
+        }
+<span class="fc bfc" id="L917" title="All 2 branches covered.">        for (int i = 0; i &lt; paths.size(); i++) {</span>
+<span class="fc" id="L918">            paths.get(i).draw(this);</span>
+        }
+<span class="fc" id="L920">        wizardhouse.draw(this);</span>
+
+<span class="fc bfc" id="L922" title="All 2 branches covered.">        for (Wave w : waves) {</span>
+<span class="fc" id="L923">            w.draw(this, countFrame);</span>
+<span class="fc" id="L924">        }</span>
+
+<span class="fc bfc" id="L926" title="All 2 branches covered.">        for (Tower t : towers) {</span>
+<span class="fc" id="L927">            t.draw(this, loadImage(&quot;src/main/resources/WizardTD/fireball.png&quot;));</span>
+<span class="fc" id="L928">        }</span>
+
+<span class="fc" id="L930">        waveNum = findWave(countFrame);</span>
+<span class="fc" id="L931">        int nextWaveStartTime = findWaveStartTime(countFrame);</span>
+<span class="fc" id="L932">        int currentTime = countFrame / 60;</span>
+<span class="fc" id="L933">        int timeRemain = nextWaveStartTime - currentTime;</span>
+
+<span class="pc bpc" id="L935" title="2 of 4 branches missed.">        if (nextWaveStartTime != -1 &amp;&amp; timeRemain &gt;= 0) {</span>
+<span class="fc" id="L936">            fill(0);</span>
+<span class="fc" id="L937">            textSize(30);</span>
+<span class="fc" id="L938">            text(String.format(&quot;Wave %d starts: %d&quot;, waveNum, timeRemain), 5, 30);</span>
+        }
+
+<span class="fc" id="L941">        fill(0);</span>
+<span class="fc" id="L942">        textSize(20);</span>
+<span class="fc" id="L943">        text(&quot;MANA:&quot;, 300, 30);</span>
+
+<span class="fc" id="L945">        int totalWidth = 350;</span>
+<span class="fc" id="L946">        int w1 = (int) (((float) mana) / manaCap * totalWidth);</span>
+<span class="fc" id="L947">        int w2 = totalWidth - w1;</span>
+
+<span class="fc" id="L949">        stroke(0);</span>
+<span class="fc" id="L950">        fill(0, 191, 255);</span>
+<span class="fc" id="L951">        this.rect(370, 11, w1, 20);</span>
+
+<span class="pc bpc" id="L953" title="1 of 2 branches missed.">        if (mana != manaCap) {</span>
+<span class="fc" id="L954">            stroke(0);</span>
+<span class="fc" id="L955">            fill(255, 250, 250);</span>
+<span class="fc" id="L956">            this.rect(370 + w1, 11, w2, 20);</span>
+        }
+
+<span class="fc" id="L959">        fill(0);</span>
+<span class="fc" id="L960">        textSize(16);</span>
+<span class="fc" id="L961">        text(String.format(&quot; %d / %d&quot;, mana, manaCap), 500, 28);</span>
+
+<span class="pc bpc" id="L963" title="1 of 2 branches missed.">        if(!isPpressed) {</span>
+<span class="fc bfc" id="L964" title="All 2 branches covered.">            manaCounter += isFFpressed ? 2 : 1;</span>
+<span class="fc bfc" id="L965" title="All 2 branches covered.">            if (manaCounter &gt;= 60) {</span>
+<span class="fc" id="L966">                this.mana += (int) (manaGained * manaGainedMultiplier);</span>
+<span class="pc bpc" id="L967" title="1 of 2 branches missed.">                if (this.mana &gt;= manaCap) {</span>
+<span class="nc" id="L968">                    this.mana = manaCap;</span>
+                }
+<span class="fc" id="L970">                manaCounter -= 60;</span>
+            }
+        }
+
+<span class="fc" id="L974">        fill(0);</span>
+<span class="fc" id="L975">        stroke(0);</span>
+<span class="fc" id="L976">        fill(139, 121, 94);</span>
+<span class="fc" id="L977">        rect(645, 80, 50, 50);</span>
+<span class="fc" id="L978">        drawKey(645, 80, isHoverFf, isFFpressed);</span>
+
+<span class="fc" id="L980">        fill(0);</span>
+<span class="fc" id="L981">        textSize(30);</span>
+<span class="fc" id="L982">        text(&quot;FF&quot;, 655, 110);</span>
+
+<span class="fc" id="L984">        fill(0);</span>
+<span class="fc" id="L985">        textSize(12);</span>
+<span class="fc" id="L986">        text(&quot;2*speed&quot;, 700, 95);</span>
+
+<span class="fc" id="L988">        stroke(0);</span>
+<span class="fc" id="L989">        fill(139, 121, 94);</span>
+<span class="fc" id="L990">        rect(645, 140, 50, 50);</span>
+<span class="fc" id="L991">        drawKey(645, 140, isHoverP, isPpressed);</span>
+
+<span class="fc" id="L993">        fill(0);</span>
+<span class="fc" id="L994">        textSize(30);</span>
+<span class="fc" id="L995">        text(&quot;P&quot;, 655, 170);</span>
+
+<span class="fc" id="L997">        fill(0);</span>
+<span class="fc" id="L998">        textSize(12);</span>
+<span class="fc" id="L999">        text(&quot;PAUSE&quot;, 700, 155);</span>
+
+<span class="fc" id="L1001">        stroke(0);</span>
+<span class="fc" id="L1002">        fill(139, 121, 94);</span>
+<span class="fc" id="L1003">        rect(645, 200, 50, 50);</span>
+<span class="fc" id="L1004">        drawKey(645, 200, isHoverBuildTower, isTpressed);</span>
+
+<span class="fc" id="L1006">        fill(0);</span>
+<span class="fc" id="L1007">        textSize(30);</span>
+<span class="fc" id="L1008">        text(&quot;T&quot;, 655, 230);</span>
+
+<span class="fc" id="L1010">        fill(0);</span>
+<span class="fc" id="L1011">        textSize(12);</span>
+<span class="fc" id="L1012">        text(&quot;Build&quot;, 700, 215);</span>
+
+<span class="fc" id="L1014">        fill(0);</span>
+<span class="fc" id="L1015">        textSize(12);</span>
+<span class="fc" id="L1016">        text(&quot;tower&quot;, 700, 240);</span>
+
+<span class="fc" id="L1018">        stroke(0);</span>
+<span class="fc" id="L1019">        fill(139, 121, 94);</span>
+<span class="fc" id="L1020">        rect(645, 260, 50, 50);</span>
+<span class="fc" id="L1021">        drawKey(645, 260, isHoverU1, isU1pressed);</span>
+
+<span class="fc" id="L1023">        fill(0);</span>
+<span class="fc" id="L1024">        textSize(30);</span>
+<span class="fc" id="L1025">        text(&quot;U1&quot;, 655, 290);</span>
+
+<span class="fc" id="L1027">        fill(0);</span>
+<span class="fc" id="L1028">        textSize(12);</span>
+<span class="fc" id="L1029">        text(&quot;Upgrade&quot;, 700, 280);</span>
+
+<span class="fc" id="L1031">        fill(0);</span>
+<span class="fc" id="L1032">        textSize(12);</span>
+<span class="fc" id="L1033">        text(&quot;range&quot;, 700, 295);</span>
+
+<span class="fc" id="L1035">        stroke(0);</span>
+<span class="fc" id="L1036">        fill(139, 121, 94);</span>
+<span class="fc" id="L1037">        rect(645, 320, 50, 50);</span>
+<span class="fc" id="L1038">        drawKey(645, 320, isHoverU2, isU2pressed);</span>
+
+<span class="fc" id="L1040">        fill(0);</span>
+<span class="fc" id="L1041">        textSize(30);</span>
+<span class="fc" id="L1042">        text(&quot;U2&quot;, 655, 350);</span>
+
+<span class="fc" id="L1044">        fill(0);</span>
+<span class="fc" id="L1045">        textSize(12);</span>
+<span class="fc" id="L1046">        text(&quot;Upgrade&quot;, 700, 340);</span>
+
+<span class="fc" id="L1048">        fill(0);</span>
+<span class="fc" id="L1049">        textSize(12);</span>
+<span class="fc" id="L1050">        text(&quot;speed&quot;, 700, 355);</span>
+
+<span class="fc" id="L1052">        stroke(0);</span>
+<span class="fc" id="L1053">        fill(139, 121, 94);</span>
+<span class="fc" id="L1054">        rect(645, 380, 50, 50);</span>
+<span class="fc" id="L1055">        drawKey(645, 380, isHoverU3, isU3pressed);</span>
+
+<span class="fc" id="L1057">        fill(0);</span>
+<span class="fc" id="L1058">        textSize(30);</span>
+<span class="fc" id="L1059">        text(&quot;U3&quot;, 655, 410);</span>
+
+<span class="fc" id="L1061">        fill(0);</span>
+<span class="fc" id="L1062">        textSize(12);</span>
+<span class="fc" id="L1063">        text(&quot;Upgrade&quot;, 700, 400);</span>
+
+<span class="fc" id="L1065">        fill(0);</span>
+<span class="fc" id="L1066">        textSize(12);</span>
+<span class="fc" id="L1067">        text(&quot;damage&quot;, 700, 415);</span>
+
+<span class="fc" id="L1069">        stroke(0);</span>
+<span class="fc" id="L1070">        fill(139, 121, 94);</span>
+<span class="fc" id="L1071">        rect(645, 440, 50, 50);</span>
+<span class="fc" id="L1072">        drawKey(645, 440, isHoverManaPool, isMpressed);</span>
+
+<span class="fc" id="L1074">        fill(0);</span>
+<span class="fc" id="L1075">        textSize(30);</span>
+<span class="fc" id="L1076">        text(&quot;M&quot;, 655, 470);</span>
+
+<span class="fc" id="L1078">        fill(0);</span>
+<span class="fc" id="L1079">        textSize(12);</span>
+<span class="fc" id="L1080">        text(&quot;Mana pool&quot;, 700, 455);</span>
+
+<span class="fc" id="L1082">        fill(0);</span>
+<span class="fc" id="L1083">        textSize(12);</span>
+<span class="fc" id="L1084">        text(String.format(&quot;cost: %d&quot;, manaPoolCost), 700, 470);</span>
+
+<span class="fc" id="L1086">        stroke(0);</span>
+<span class="fc" id="L1087">        fill(139, 121, 94);</span>
+<span class="fc" id="L1088">        rect(645, 500, 50, 50);</span>
+<span class="fc" id="L1089">        drawKey(645, 500, isHoverU4, isU4pressed);</span>
+
+<span class="fc" id="L1091">        fill(0);</span>
+<span class="fc" id="L1092">        textSize(30);</span>
+<span class="fc" id="L1093">        text(&quot;U4&quot;, 655, 530);</span>
+
+<span class="fc" id="L1095">        fill(0);</span>
+<span class="fc" id="L1096">        textSize(12);</span>
+<span class="fc" id="L1097">        text(&quot;Freeze&quot;, 700, 515);</span>
+
+<span class="fc" id="L1099">        fill(0);</span>
+<span class="fc" id="L1100">        textSize(12);</span>
+<span class="fc" id="L1101">        text(&quot;tower&quot;, 700, 530);</span>
+
+<span class="fc bfc" id="L1103" title="All 2 branches covered.">        if (isHoverBuildTower) {</span>
+<span class="fc" id="L1104">            stroke(0);</span>
+<span class="fc" id="L1105">            fill(255);</span>
+<span class="fc" id="L1106">            rect(560, 190, 70, 25);</span>
+<span class="fc" id="L1107">            fill(0);</span>
+<span class="fc" id="L1108">            textSize(12);</span>
+<span class="fc" id="L1109">            text(String.format(&quot;Cost: %d&quot;, towerCost), 568, 207);</span>
+        }
+
+<span class="pc bpc" id="L1112" title="1 of 2 branches missed.">        if (isHoverManaPool) {</span>
+<span class="nc" id="L1113">            stroke(0);</span>
+<span class="nc" id="L1114">            fill(255);</span>
+<span class="nc" id="L1115">            rect(560, 420, 70, 25);</span>
+<span class="nc" id="L1116">            fill(0);</span>
+<span class="nc" id="L1117">            textSize(12);</span>
+<span class="nc" id="L1118">            text(String.format(&quot;Cost: %d&quot;, manaPoolCost), 568, 440);</span>
+        }
+
+<span class="fc bfc" id="L1121" title="All 2 branches covered.">        if (isHoverU4) {</span>
+<span class="fc" id="L1122">            stroke(0);</span>
+<span class="fc" id="L1123">            fill(255);  // 鐧借壊鑳屾櫙</span>
+<span class="fc" id="L1124">            rect(560, 495, 70, 25);</span>
+<span class="fc" id="L1125">            fill(0);  // 榛戣壊鏂囧瓧</span>
+<span class="fc" id="L1126">            textSize(12);</span>
+<span class="fc" id="L1127">            text(String.format(&quot;Cost: %d&quot;, freezeCost), 568, 513);  // 鏄剧ず鑺辫垂</span>
+        }
+<span class="fc" id="L1129">    }</span>
+
+    public static void main(String[] args) {
+<span class="nc" id="L1132">        PApplet.main(&quot;WizardTD.App&quot;);</span>
+<span class="nc" id="L1133">    }</span>
+
+    /**
+     * Source: https://stackoverflow.com/questions/37758061/rotate-a-buffered-image-in-java
+     *
+     * @param pimg  The image to be rotated
+     * @param angle between 0 and 360 degrees
+     * @return the new rotated image
+     */
+    public PImage rotateImageByDegrees(PImage pimg, double angle) {
+<span class="fc" id="L1143">        BufferedImage img = (BufferedImage) pimg.getNative();</span>
+<span class="fc" id="L1144">        double rads = Math.toRadians(angle);</span>
+<span class="fc" id="L1145">        double sin = Math.abs(Math.sin(rads)), cos = Math.abs(Math.cos(rads));</span>
+<span class="fc" id="L1146">        int w = img.getWidth();</span>
+<span class="fc" id="L1147">        int h = img.getHeight();</span>
+<span class="fc" id="L1148">        int newWidth = (int) Math.floor(w * cos + h * sin);</span>
+<span class="fc" id="L1149">        int newHeight = (int) Math.floor(h * cos + w * sin);</span>
+
+<span class="fc" id="L1151">        PImage result = this.createImage(newWidth, newHeight, ARGB);</span>
+        //BufferedImage rotated = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+<span class="fc" id="L1153">        BufferedImage rotated = (BufferedImage) result.getNative();</span>
+<span class="fc" id="L1154">        Graphics2D g2d = rotated.createGraphics();</span>
+<span class="fc" id="L1155">        AffineTransform at = new AffineTransform();</span>
+<span class="fc" id="L1156">        at.translate((newWidth - w) / 2, (newHeight - h) / 2);</span>
+
+<span class="fc" id="L1158">        int x = w / 2;</span>
+<span class="fc" id="L1159">        int y = h / 2;</span>
+
+<span class="fc" id="L1161">        at.rotate(rads, x, y);</span>
+<span class="fc" id="L1162">        g2d.setTransform(at);</span>
+<span class="fc" id="L1163">        g2d.drawImage(img, 0, 0, null);</span>
+<span class="fc" id="L1164">        g2d.dispose();</span>
+<span class="fc bfc" id="L1165" title="All 2 branches covered.">        for (int i = 0; i &lt; newWidth; i++) {</span>
+<span class="fc bfc" id="L1166" title="All 2 branches covered.">            for (int j = 0; j &lt; newHeight; j++) {</span>
+<span class="fc" id="L1167">                result.set(i, j, rotated.getRGB(i, j));</span>
+            }
+        }
+<span class="fc" id="L1170">        return result;</span>
+    }
+
+    public boolean getIsPpressed() {
+<span class="fc" id="L1174">        return isPpressed;</span>
+    }
+
+
+    public boolean getIsFFpressed() {
+<span class="fc" id="L1179">        return isFFpressed;</span>
+    }
+
+
+    public boolean getIsMpressed() {
+<span class="fc" id="L1184">        return isMpressed;</span>
+    }
+
+
+    public void setManaCap(int manaCap) {
+<span class="fc" id="L1189">        this.manaCap = manaCap;</span>
+<span class="fc" id="L1190">    }</span>
+
+    public void setManaGainedMultiplier(double manaGainedMultiplier) {
+<span class="fc" id="L1193">        this.manaGainedMultiplier = manaGainedMultiplier;</span>
+<span class="fc" id="L1194">    }</span>
+
+    public boolean getIsHoverBuildTower() {
+<span class="fc" id="L1197">        return isHoverBuildTower;</span>
+    }
+
+    public boolean getIsHoverManaPool() {
+<span class="fc" id="L1201">        return isHoverManaPool;</span>
+    }
+
+    public boolean getIsHoverP() {
+<span class="fc" id="L1205">        return isHoverP;</span>
+    }
+
+    public boolean getIsHoverFf() {
+<span class="fc" id="L1209">        return isHoverFf;</span>
+    }
+
+    public boolean getIsHoverU1() {
+<span class="fc" id="L1213">        return isHoverU1;</span>
+    }
+
+
+    public boolean getIsHoverU2() {
+<span class="fc" id="L1218">        return isHoverU2;</span>
+    }
+
+
+    public boolean getIsHoverU3() {
+<span class="fc" id="L1223">        return isHoverU3;</span>
+    }
+
+    public boolean getIsHoverU4() {
+<span class="fc" id="L1227">        return isHoverU4;</span>
+    }
+
+
+    public int getTowerCost() {
+<span class="fc" id="L1232">        return towerCost;</span>
+    }
+
+    public void setTowerCost(int towerCost) {
+<span class="fc" id="L1236">        this.towerCost = towerCost;</span>
+<span class="fc" id="L1237">    }</span>
+
+    public void setIsHoverBuildTower(boolean isHoverBuildTower) {
+<span class="fc" id="L1240">        this.isHoverBuildTower = isHoverBuildTower;</span>
+<span class="fc" id="L1241">    }</span>
+
+
+    public void setIsHoverManaPool(boolean isHoverManaPool) {
+<span class="fc" id="L1245">        this.isHoverManaPool = isHoverManaPool;</span>
+<span class="fc" id="L1246">    }</span>
+
+
+    public void setIsHoverU4(boolean isHoverU4) {
+<span class="fc" id="L1250">        this.isHoverU4 = isHoverU4;</span>
+<span class="fc" id="L1251">    }</span>
+
+    public void setState(GameState state) {
+<span class="fc" id="L1254">        this.state = state;</span>
+<span class="fc" id="L1255">    }</span>
+
+    public GameState getState() {
+<span class="fc" id="L1258">        return this.state;</span>
+    }
+
+    public void setIsTpressed(boolean isTpressed) {
+<span class="fc" id="L1262">        this.isTpressed = isTpressed;</span>
+<span class="fc" id="L1263">    }</span>
+
+    public void setIsU1pressed(boolean isU1pressed) {
+<span class="fc" id="L1266">        this.isU1pressed = isU1pressed;</span>
+<span class="fc" id="L1267">    }</span>
+
+
+    public void setIsU3pressed(boolean isU3pressed) {
+<span class="fc" id="L1271">        this.isU3pressed = isU3pressed;</span>
+<span class="fc" id="L1272">    }</span>
+
+
+    public void setIsU2pressed(boolean isU2pressed) {
+<span class="fc" id="L1276">        this.isU2pressed = isU2pressed;</span>
+<span class="fc" id="L1277">    }</span>
+
+    public void setIsU4pressed(boolean isU4pressed) {
+<span class="fc" id="L1280">        this.isU4pressed = isU4pressed;</span>
+<span class="fc" id="L1281">    }</span>
+
+    public void setFreezeCost(int freezeCost) {
+<span class="fc" id="L1284">        this.freezeCost = freezeCost;</span>
+<span class="fc" id="L1285">    }</span>
+
+    public void setIsFFpressed(boolean isFFpressed) {
+<span class="fc" id="L1288">        this.isFFpressed = isFFpressed;</span>
+<span class="fc" id="L1289">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

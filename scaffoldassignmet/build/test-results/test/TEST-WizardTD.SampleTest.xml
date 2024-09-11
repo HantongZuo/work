@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="WizardTD.SampleTest" tests="56" skipped="0" failures="0" errors="0" timestamp="2023-10-27T08:26:05" hostname="LAPTOP-PIRNN83D" time="5.618">
+  <properties/>
+  <testcase name="testMonsterDeathAnimation()" classname="WizardTD.SampleTest" time="0.452"/>
+  <testcase name="testU2Pressed()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testTPressed()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testTowerminLevelLessThanSpeedLevel()" classname="WizardTD.SampleTest" time="0.218"/>
+  <testcase name="testSetTowerWithEnoughMana()" classname="WizardTD.SampleTest" time="0.216"/>
+  <testcase name="testU4Release()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testTowerCost()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testMPressed()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testTower()" classname="WizardTD.SampleTest" time="0.212"/>
+  <testcase name="testLost()" classname="WizardTD.SampleTest" time="0.462"/>
+  <testcase name="testMana()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testRPressed()" classname="WizardTD.SampleTest" time="0.336"/>
+  <testcase name="testIsHoverU1WhenMouseMovedOverIt()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testTowerminLevelLessThanDamageLevel()" classname="WizardTD.SampleTest" time="0.215"/>
+  <testcase name="testManaDoesNotExceedCap()" classname="WizardTD.SampleTest" time="0.462"/>
+  <testcase name="testIsHoverU2WhenMouseMovedOverIt()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testCheckShapeofPath()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testU2Release()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testIsHoverU3WhenMouseMovedOverIt()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testFPressed()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testTRelease()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testIsHoverU4WhenMouseMovedOverIt()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testManaGainedMultiplier()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testU3Pressed()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testPPressed()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testTowerUpgrade()" classname="WizardTD.SampleTest" time="0.217"/>
+  <testcase name="testTowerminLevelLessThanRangeLevel()" classname="WizardTD.SampleTest" time="0.215"/>
+  <testcase name="testMRelease()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testIsHoverManaPoolWhenMouseMovedOverIt()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testManaCap()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testU1Pressed()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testFRelease()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testCheckValidPlace()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testManaUpdateOnCountFrame()" classname="WizardTD.SampleTest" time="0.489"/>
+  <testcase name="testU3Release()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testPRelease()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="checkSetupandDraw()" classname="WizardTD.SampleTest" time="0.479"/>
+  <testcase name="testHoverBuildTowerTooltip()" classname="WizardTD.SampleTest" time="0.22"/>
+  <testcase name="testIsHoverBuildTowerWhenMouseMovedOverIt()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testMousePressedFF()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testMousePressedU1()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testMousePressedU2()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testMousePressedU3()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testMousePressedU4()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testU4Pressed()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testMousePressedM()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testMousePressedP()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testMousePressedT()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testTowerHoverStateWhenMouseMovedOverIt()" classname="WizardTD.SampleTest" time="0.491"/>
+  <testcase name="testHoverU4Tooltip()" classname="WizardTD.SampleTest" time="0.219"/>
+  <testcase name="testU1Release()" classname="WizardTD.SampleTest" time="0.0"/>
+  <testcase name="testSetTowerWithoutEnoughMana()" classname="WizardTD.SampleTest" time="0.22"/>
+  <testcase name="testIsHoverPWhenMouseMovedOverIt()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testDoubleSpeed()" classname="WizardTD.SampleTest" time="0.221"/>
+  <testcase name="testIsHoverFfWhenMouseMovedOverIt()" classname="WizardTD.SampleTest" time="0.001"/>
+  <testcase name="testHoverManaPoolTooltip()" classname="WizardTD.SampleTest" time="0.222"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

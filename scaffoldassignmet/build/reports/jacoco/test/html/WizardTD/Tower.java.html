@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tower.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">scaffoldassignmet</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Tower.java</span></div><h1>Tower.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+public class Tower{
+
+    private int range;
+    private double fireSpeed;
+    private int damage;
+    private int x;
+    private int y;
+    private PImage towerSprite;
+    private boolean isHover;
+    private ArrayList&lt;Fireball&gt; fireballs;
+<span class="fc" id="L19">    private int rangeLevel = 0;</span>
+<span class="fc" id="L20">    private int speedLevel = 0;</span>
+<span class="fc" id="L21">    private int damageLevel = 0;</span>
+    private static final int UPGRADE_COST_INCREMENT = 10;
+    private static final int BASE_UPGRADE_COST = 20;
+    private int speed;
+    private int damageUp;
+    private double freezeTime;
+    private boolean isFreezeTower;
+    private boolean hasBeenFrozen;
+    private int fireCounter;
+
+
+    /**
+     * Constructor of Tower
+     * @param range
+     * @param fireSpeed
+     * @param damage
+     * @param x
+     * @param y
+     * @param towerSprite
+     * @param freezeTime
+     */
+<span class="fc" id="L42">    public Tower(int range, double fireSpeed, int damage, int x, int y, PImage towerSprite, double freezeTime){</span>
+<span class="fc" id="L43">        this.range = range;</span>
+<span class="fc" id="L44">        this.fireSpeed =  fireSpeed;</span>
+<span class="fc" id="L45">        this.damage = damage;</span>
+<span class="fc" id="L46">        this.x = x;</span>
+<span class="fc" id="L47">        this.y = y;</span>
+<span class="fc" id="L48">        this.towerSprite = towerSprite;</span>
+<span class="fc" id="L49">        this.isHover = false;</span>
+<span class="fc" id="L50">        this.fireballs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L51">        this.damageUp = damage / 2;</span>
+<span class="fc" id="L52">        this.speed = (int) (60 / fireSpeed);</span>
+<span class="fc" id="L53">        this.freezeTime = freezeTime;</span>
+<span class="fc" id="L54">        this.isFreezeTower = false;</span>
+<span class="fc" id="L55">        this.hasBeenFrozen = false;</span>
+<span class="fc" id="L56">        this.fireCounter = 0;</span>
+<span class="fc" id="L57">    }</span>
+
+    /**
+     * Used for upgrading the range of the tower.
+     */
+    public void upgradeRange(){
+<span class="fc" id="L63">            rangeLevel++;</span>
+<span class="fc" id="L64">            range += 32;</span>
+<span class="fc" id="L65">    }</span>
+
+    /**
+     * Used for upgrading the speed of the tower.
+     */
+    public void upgradeSpeed(){
+<span class="fc" id="L71">            speedLevel++;</span>
+<span class="fc" id="L72">            fireSpeed = fireSpeed + 0.5;</span>
+<span class="fc" id="L73">            speed = (int)(60 / fireSpeed);</span>
+<span class="fc" id="L74">    }</span>
+
+    /**
+     * Used for upgrading the damages of the tower.
+     */
+    public void upgradeDamage(){
+<span class="fc" id="L80">            damageLevel++;</span>
+<span class="fc" id="L81">            damage += damageUp;</span>
+<span class="fc" id="L82">    }</span>
+
+    public boolean getHasBeenFrozen(){
+<span class="fc" id="L85">        return this.hasBeenFrozen;</span>
+    }
+    public void setHasBeenFrozen(boolean hasBeenFrozen){
+<span class="fc" id="L88">        this.hasBeenFrozen = hasBeenFrozen;</span>
+<span class="fc" id="L89">    }</span>
+
+    public int getRangeLevel(){
+<span class="fc" id="L92">        return this.rangeLevel;</span>
+    }
+    public int getSpeedLevel(){
+<span class="fc" id="L95">        return this.speedLevel;</span>
+    }
+    public int getDamageLevel(){
+<span class="fc" id="L98">        return this.damageLevel;</span>
+    }
+
+    public void setIsFreezeTower(boolean isFreezeTower){
+<span class="fc" id="L102">        this.isFreezeTower = isFreezeTower;</span>
+<span class="fc" id="L103">    }</span>
+
+    /**
+     * Calculate the cost of upgrade each time.
+     * @param level
+     * @return
+     */
+    public int upgradeCost(int level){
+<span class="fc" id="L111">        int upgradeCost = BASE_UPGRADE_COST + (level - 1) * UPGRADE_COST_INCREMENT;</span>
+<span class="fc" id="L112">        return upgradeCost;</span>
+    }
+
+    /**
+     * Draw elements related to the tower.
+     * Highlight the tower range radius by hovering over it and display the tooltips of upgrading a tower.
+     * Tower image changed to orange and red when all of level 1 or level 2 upgrades are done.
+     * Show the indicators for different individual upgrades(range, speed, damage).
+     * Show the indicator of frozen tower.
+     *  Fireballs are generated at regular intervals.
+     *  Erase the fireball which finishes its job, either collides a monster or the monster died before it arrives.
+     * @param app
+     * @param fireSprite
+     */
+    public void draw(App app, PImage fireSprite){
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if(this.isHover){</span>
+<span class="fc" id="L128">            app.stroke(255, 255, 0);</span>
+<span class="fc" id="L129">            app.noFill();</span>
+<span class="fc" id="L130">            app.ellipse(x + 16, y + 16, 2 * range, 2 * range);</span>
+
+<span class="fc" id="L132">            int costRange = this.upgradeCost(this.getRangeLevel() + 1);</span>
+<span class="fc" id="L133">            int costSpeed = this.upgradeCost(this.getSpeedLevel() + 1);</span>
+<span class="fc" id="L134">            int costDamage = this.upgradeCost(this.getDamageLevel() + 1);</span>
+<span class="fc" id="L135">            boolean isU1pressed = app.getIsU1pressed();</span>
+<span class="fc" id="L136">            boolean isU2pressed = app.getIsU2pressed();</span>
+<span class="fc" id="L137">            boolean isU3pressed = app.getIsU3pressed();</span>
+<span class="fc" id="L138">            int costTotal = 0;</span>
+
+<span class="pc bpc" id="L140" title="5 of 6 branches missed.">            if(isU1pressed || isU2pressed || isU3pressed){</span>
+<span class="fc" id="L141">            app.stroke(0);</span>
+<span class="fc" id="L142">            app.fill(255);</span>
+<span class="fc" id="L143">            app.rect(642, 565, 105, 20);</span>
+
+<span class="fc" id="L145">            app.stroke(0);</span>
+<span class="fc" id="L146">            app.fill(255);</span>
+<span class="fc" id="L147">            app.rect(642, 585, 105, 60);</span>
+
+<span class="fc" id="L149">            app.stroke(0);</span>
+<span class="fc" id="L150">            app.fill(255);</span>
+<span class="fc" id="L151">            app.rect(642, 645, 105, 20);</span>
+            }
+
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">            if(isU1pressed){</span>
+<span class="fc" id="L155">                app.textSize(15);</span>
+<span class="fc" id="L156">                app.fill(0);</span>
+<span class="fc" id="L157">                app.text(String.format(&quot;range: %d&quot;, costRange), 645, 600);</span>
+<span class="fc" id="L158">                costTotal += costRange;</span>
+            }
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">            if(isU2pressed){</span>
+<span class="fc" id="L161">                app.textSize(15);</span>
+<span class="fc" id="L162">                app.fill(0);</span>
+<span class="fc" id="L163">                app.text(String.format(&quot;speed: %d&quot;, costSpeed), 645, 620);</span>
+<span class="fc" id="L164">                costTotal += costSpeed;</span>
+            }
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">            if(isU3pressed){</span>
+<span class="fc" id="L167">                app.textSize(15);</span>
+<span class="fc" id="L168">                app.fill(0);</span>
+<span class="fc" id="L169">                app.text(String.format(&quot;damage: %d&quot;, costDamage), 645, 640);</span>
+<span class="fc" id="L170">                costTotal += costDamage;</span>
+            }
+
+<span class="pc bpc" id="L173" title="5 of 6 branches missed.">            if(isU1pressed || isU2pressed || isU3pressed) {</span>
+
+<span class="fc" id="L175">                app.textSize(15);</span>
+<span class="fc" id="L176">                app.fill(0);</span>
+<span class="fc" id="L177">                app.text(&quot;Upgrade cost&quot;, 645, 580);</span>
+
+<span class="fc" id="L179">                app.textSize(15);</span>
+<span class="fc" id="L180">                app.fill(0);</span>
+<span class="fc" id="L181">                app.text(String.format(&quot;Total: %d&quot;, costTotal), 645, 660);</span>
+            }
+        }
+
+<span class="fc" id="L185">        int minLevel = Math.min(Math.min(rangeLevel, speedLevel), damageLevel);</span>
+
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if(minLevel == 1){</span>
+<span class="fc" id="L188">            this.towerSprite = app.loadImage(&quot;src/main/resources/WizardTD/tower1.png&quot;);</span>
+        }
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        if(minLevel == 2){</span>
+<span class="fc" id="L191">            this.towerSprite = app.loadImage(&quot;src/main/resources/WizardTD/tower2.png&quot;);</span>
+        }
+<span class="fc" id="L193">        app.image(towerSprite, x, y);</span>
+
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        if(rangeLevel &gt; minLevel) {</span>
+<span class="fc" id="L196">            app.fill(255, 0, 255);</span>
+<span class="fc" id="L197">            app.textSize(10);</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">            for (int i = 0; i &lt; (rangeLevel - minLevel); i++) {</span>
+<span class="fc" id="L199">                app.text('O', x + i * 8, y + 8);</span>
+            }
+        }
+
+<span class="fc bfc" id="L203" title="All 2 branches covered.">        if(speedLevel &gt; minLevel) {</span>
+<span class="fc" id="L204">            app.stroke(135, 206, 235);</span>
+<span class="fc" id="L205">            app.strokeWeight((speedLevel - minLevel) * 2);</span>
+<span class="fc" id="L206">            app.noFill();</span>
+<span class="fc" id="L207">            app.rect(x + 7, y + 7, 18, 18);</span>
+<span class="fc" id="L208">            app.strokeWeight(1);</span>
+        }
+
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        if(damageLevel &gt; minLevel) {</span>
+<span class="fc" id="L212">            app.fill(255, 0, 255);</span>
+<span class="fc" id="L213">            app.textSize(10);</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">            for (int i = 0; i &lt; damageLevel - minLevel; i++) {</span>
+<span class="fc" id="L215">                app.text('X', x + i * 5, y + 32);</span>
+            }
+        }
+
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        if(isFreezeTower) {</span>
+<span class="fc" id="L220">            app.stroke(255, 250, 250);</span>
+<span class="fc" id="L221">            app.fill(255, 250, 250);</span>
+<span class="fc" id="L222">            app.ellipse(x + 16, y + 16, 10, 10);</span>
+        }
+
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">        if(!app.getIsPpressed()) {</span>
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">            fireCounter += app.getIsFFpressed() ? 2 : 1;</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">            if (fireCounter &gt;= speed) {</span>
+<span class="fc" id="L228">                Monster target = findTarget(app);</span>
+<span class="pc bpc" id="L229" title="1 of 2 branches missed.">                if (target != null) {</span>
+<span class="fc" id="L230">                    Fireball f = new Fireball(x + 16, y + 16, fireSprite, damage, target, freezeTime, isFreezeTower);</span>
+<span class="fc" id="L231">                    fireballs.add(f);</span>
+<span class="fc" id="L232">                    target.setIsFired(true);</span>
+                }
+<span class="fc" id="L234">                fireCounter = 0;</span>
+            }
+<span class="fc bfc" id="L236" title="All 2 branches covered.">            for (Fireball f : fireballs) {</span>
+<span class="fc" id="L237">                f.draw(app);</span>
+<span class="fc" id="L238">            }</span>
+        }
+
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        for(int i = fireballs.size() - 1; i &gt;= 0; i-- ){</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">            if(fireballs.get(i).getDisAppear()){</span>
+<span class="fc" id="L243">                fireballs.remove(i);</span>
+            }
+        }
+<span class="fc" id="L246">    }</span>
+
+    /**
+     * Find the monster that meets the criteria to be the target of this tower.
+     * @param app
+     * @return
+     */
+    private Monster findTarget(App app){
+        // loop all monsters
+<span class="fc" id="L255">        ArrayList&lt;Monster&gt; potentialTargets = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L256">        ArrayList&lt;Wave&gt; waves = app.waves;</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">        for(Wave w : waves){</span>
+<span class="fc bfc" id="L258" title="All 2 branches covered.">            for(Monster m : w.getMonsters()){</span>
+<span class="pc bpc" id="L259" title="1 of 4 branches missed.">                if(!m.getIsFired() &amp;&amp; inRange(m)){  // inRange dist(m, tower) &lt;= range</span>
+<span class="fc" id="L260">                    potentialTargets.add(m);</span>
+                }
+<span class="fc" id="L262">            }</span>
+<span class="fc" id="L263">        }</span>
+<span class="pc bpc" id="L264" title="1 of 2 branches missed.">        if(!potentialTargets.isEmpty()){</span>
+<span class="fc" id="L265">            Random random = new Random();</span>
+<span class="fc" id="L266">            int i = random.nextInt(potentialTargets.size());</span>
+<span class="fc" id="L267">            return potentialTargets.get(i);</span>
+        }
+<span class="nc" id="L269">        return null;</span>
+    }
+
+    /**
+     * Check if the monster is in the range of this tower.
+     * @param m
+     * @return
+     */
+    private boolean inRange(Monster m){
+<span class="fc" id="L278">        double dist =  Math.sqrt((m.getX() - x) * (m.getX() - x) + (m.getY() - y) * (m.getY() - y));</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">        if(dist &lt;= range){</span>
+<span class="fc" id="L280">            return true;</span>
+        }
+<span class="fc" id="L282">        return false;</span>
+    }
+
+    public int getX(){
+<span class="fc" id="L286">        return this.x;</span>
+    }
+
+    public int getY(){
+<span class="fc" id="L290">        return this.y;</span>
+    }
+
+    public void setIsHover(boolean isHover){
+<span class="fc" id="L294">        this.isHover = isHover;</span>
+<span class="fc" id="L295">    }</span>
+
+    public boolean getIsHover() {
+<span class="fc" id="L298">        return isHover;</span>
+    }
+
+    public void setRangeLevel(int rangeLevel) {
+<span class="fc" id="L302">        this.rangeLevel = rangeLevel;</span>
+<span class="fc" id="L303">    }</span>
+
+    public void setDamageLevel(int damageLevel) {
+<span class="fc" id="L306">        this.damageLevel = damageLevel;</span>
+<span class="fc" id="L307">    }</span>
+
+    public void setSpeedLevel(int speedLevel) {
+<span class="fc" id="L310">        this.speedLevel = speedLevel;</span>
+<span class="fc" id="L311">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
